@@ -99,16 +99,32 @@ Each run writes `backend/evals/results/<split>_<arm>.json` (with per-invoice det
 - On the dev split the offline arm scores 100% everywhere. That is **not evidence of quality**: the parser and rules were written alongside the generator. It only shows the rules agree with the label definitions. `tests/test_rules.py::test_engine_agrees_with_generator_labels` checks the same thing on 300 invoices.
 - The rule engine's 100% precision on readable invoices is partly by construction: the generator and the rules share definitions of each error. Real invoices will have ambiguities the generator doesn't produce.
 
-### Ablation: not run yet
+### Ablation (first 60 invoices of the test split, model `gemma-4-26b-a4b-it`)
 
-The two Gemini arms (`--extractor gemini` and `--mode llm_only`) are implemented and unit-tested with fake clients. They have **not** been run on the dataset: the development key was on Gemini's free tier (20 requests/day per model), and a fair comparison needs several hundred calls. **No numbers for them are reported here.** To produce them:
+The Gemini Flash models were overloaded (503) and then over quota on the free-tier development key. The runs below therefore use Gemma 4 (26B) through the same Gemini API, for both LLM arms. Every arm sees the same 60 invoices, which include held-out T5 layouts and re-billed duplicates.
+
+| Arm | Extraction acc. | Recall | Precision | Overcharge found | Falsely claimed | To review |
+|---|---|---|---|---|---|---|
+| Offline parser + rules | 77.3% | 79.7% | **100%** | 80.4% | **USD 0** | 14 |
+| **Gemma extraction + rules (hybrid)** | **90.6%** | **89.8%** | 98.1% | **92.8%** | USD 138 | 16 |
+| Gemma does everything (LLM-only) | n/a | _pending_ | _pending_ | _pending_ | _pending_ | |
+
+<!-- from evals/results/test_hybrid_heuristic_n60.md and test_hybrid_gemini_n60.md, 2026-10-08 -->
+
+- **Gemma closes most of the T5 gap.** It reads the unruled held-out layout that the offline parser cannot.
+- **All 5 Gemma failures are T2 invoices** where the extracted container type couldn't be normalised. They went to review rather than being guessed. This is a fixable mapping gap, deliberately left untuned because it was found on the test split.
+- **One false finding**, a USD 138 detention claim on invoice 20, consistent with a misread equipment date. The hybrid is not immune to extraction errors: a wrong field turns into a wrong accusation. That is why every finding shows its evidence and needs human approval.
+- **Small sample:** n = 60, roughly 59 injected errors. Treat differences of a few points as noise.
+- **Latency and cost are not meaningful here.** Free-tier Gemma costs nothing. The 16k input-tokens-per-minute cap forced long waits, so latency is mostly queueing. With paid-tier Flash, expect seconds per invoice.
+
+To reproduce or extend:
 
 ```bash
-python -m evals.run_eval --split test --extractor gemini --workers 4
-python -m evals.run_eval --split test --mode llm_only --workers 4
+GEMINI_MODEL=gemma-4-26b-a4b-it python -m evals.run_eval --split test --extractor gemini --limit 60 --workers 2
+GEMINI_MODEL=gemma-4-26b-a4b-it python -m evals.run_eval --split test --mode llm_only --limit 60 --workers 2
 ```
 
-Use `--limit N` to cap spend. The hypothesis to test is that hybrid ≥ LLM-only on precision and money accuracy. If the results disagree, report that.
+The hypothesis is that hybrid ≥ LLM-only on precision and money accuracy. The LLM-only row is filled in from its result file. If it disagrees with the hypothesis, that is what gets reported.
 
 Caveat on fairness: the `llm_only` arm is given the correct contract and ground-truth prior invoices. The hybrid arm must find the contract from its own extraction. That favours the LLM-only arm.
 

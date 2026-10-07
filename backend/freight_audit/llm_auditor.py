@@ -40,13 +40,26 @@ Contract rates are in the contract currency; convert invoice amounts using the i
 Only report overcharges. Report nothing for a clean invoice. Line numbers count charge rows from 1."""
 
 
+def contract_text(c: Contract) -> str:
+    """The whole contract as a compact table: same information as the JSON, far fewer tokens."""
+    head = (f"id {c.contract_id}; carrier {c.carrier}; currency {c.currency}; valid {c.valid_from}..{c.valid_to}\n"
+            f"allowed charges: {', '.join(a.value for a in c.allowed_charges)}\n"
+            f"tax rate by invoice currency: {', '.join(f'{k} {v}' for k, v in c.tax_rates.items())}\n"
+            f"agreed FX (units per 1 {c.currency}): {', '.join(f'{k} {v}' for k, v in c.fx_rates.items())} "
+            f"(tolerance {c.fx_tolerance})\n"
+            "rates: origin,destination,container,charge,rate,unit,free_days,valid_from,valid_to")
+    rows = [f"{r.origin},{r.destination},{r.container_type},{r.charge_type.value},{r.rate},{r.unit.value},"
+            f"{'' if r.free_days is None else r.free_days},{r.valid_from},{r.valid_to}" for r in c.rates]
+    return "\n".join([head, *rows])
+
+
 def llm_audit(pdf_bytes: bytes, contract: Contract, history: list[PriorInvoice],
               client: GeminiClient | None = None) -> tuple[list[Finding], Usage]:
     client = client or GeminiClient()
     usage = Usage()
     prior = "\n".join(f"- {p.invoice_number} | carrier {p.carrier} | B/L {p.bl_number} | total {p.total} {p.currency}"
                       for p in history) or "(none)"
-    prompt = (f"CONTRACT (JSON):\n{contract.model_dump_json()}\n\nPRIOR INVOICES ALREADY PROCESSED:\n{prior}\n\n"
+    prompt = (f"CONTRACT:\n{contract_text(contract)}\n\nPRIOR INVOICES ALREADY PROCESSED:\n{prior}\n\n"
               "Audit the attached invoice.")
     res = client.structured([pdf_part(pdf_bytes), prompt], LLMAudit, SYSTEM, usage)
     findings = [Finding(
