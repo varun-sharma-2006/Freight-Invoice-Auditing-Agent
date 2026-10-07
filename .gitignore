@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+data/*.db
+data/uploads/
+data/outbox/
+data/synthetic/
+frontend/node_modules/
+frontend/dist/

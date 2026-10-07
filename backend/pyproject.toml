@@ -1,0 +1,10 @@
+[project]
+name = "freight-audit"
+version = "1.0.0"
+description = "Freight invoice auditing agent: LLM extraction + deterministic rule engine + human review"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]

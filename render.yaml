@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: freight-audit-api
+    runtime: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: .
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://your-frontend.vercel.app
+      # SQLite on Render's disk is ephemeral; set DATABASE_URL to a Postgres URL for persistence
+      # (and add psycopg[binary] to requirements.txt).
