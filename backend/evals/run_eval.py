@@ -19,13 +19,13 @@ import statistics
 import sys
 import time
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
 
-from freight_audit.extraction import ExtractionError, extract
-from freight_audit.models import Contract, ErrorType, Finding
+from freight_audit.extraction import ExtractionError, ExtractionResult, extract
+from freight_audit.models import Contract, ErrorType, Finding, Invoice
 from freight_audit.rules import PriorInvoice, audit_invoice
 
 HERE = Path(__file__).resolve().parent
@@ -79,6 +79,31 @@ def pct(a: float, b: float) -> float | None:
     return round(100 * a / b, 1) if b else None
 
 
+def _dump_out(seq: int, o: dict) -> dict:
+    rec = dict(seq=seq, tokens=list(o["tokens"]), cost=o["cost"], latency=o["latency"])
+    if "error" in o:
+        rec["error"] = o["error"]
+    elif "findings" in o:
+        rec["findings"] = [f.model_dump(mode="json") for f in o["findings"]]
+    else:
+        res = o["extraction"]
+        rec["extraction"] = dict(invoice=res.invoice.model_dump(mode="json"), method=res.method, notes=res.notes)
+    return rec
+
+
+def _load_out(rec: dict) -> dict:
+    o = dict(tokens=tuple(rec["tokens"]), cost=rec["cost"], latency=rec["latency"])
+    if "error" in rec:
+        o["error"] = rec["error"]
+    elif "findings" in rec:
+        o["findings"] = [Finding.model_validate(f) for f in rec["findings"]]
+    else:
+        e = rec["extraction"]
+        o["extraction"] = ExtractionResult(invoice=Invoice.model_validate(e["invoice"]), method=e["method"], raw={},
+                                           notes=e["notes"])
+    return o
+
+
 def run(args) -> dict:
     data = Path(args.data)
     contracts = {p.stem: Contract.model_validate_json(p.read_text(encoding="utf-8"))
@@ -109,11 +134,40 @@ def run(args) -> dict:
         except (ExtractionError, ValueError, KeyError) as e:
             return dict(error=f"{type(e).__name__}: {e}", tokens=(0, 0), cost=0.0, latency=time.perf_counter() - t0)
         except Exception as e:  # API errors etc. - count as failures, don't abort the run
-            return dict(error=f"{type(e).__name__}: {e}", tokens=(0, 0), cost=0.0, latency=time.perf_counter() - t0)
+            return dict(error=f"{type(e).__name__}: {e}", tokens=(0, 0), cost=0.0, latency=time.perf_counter() - t0,
+                        transient=True)
 
+    # Checkpoint: each finished invoice is appended to a JSONL file, so a long API run can be watched
+    # (progress on stderr) and resumed after an interruption. Transient API failures are not saved,
+    # so a resume retries them. --fresh discards the checkpoint.
+    ckpt = Path(args.out) / f".ckpt_{args.split}_{arm}{f'_n{args.limit}' if args.limit else ''}.jsonl"
+    done: dict[int, dict] = {}
+    if ckpt.exists() and not args.fresh:
+        for line in ckpt.read_text(encoding="utf-8").splitlines():
+            rec = json.loads(line)
+            done[rec["seq"]] = _load_out(rec)
+        print(f"[{arm}] resuming: {len(done)} invoices restored from {ckpt.name}", file=sys.stderr)
+    elif ckpt.exists():
+        ckpt.unlink()
+    todo = [r for r in rows if r["seq"] not in done]
     workers = 1 if (args.mode == "hybrid" and args.extractor == "heuristic") else args.workers
-    with ThreadPoolExecutor(workers) as ex:
-        outs = list(ex.map(work, rows))
+    t_start, finished = time.perf_counter(), 0
+    ckpt.parent.mkdir(parents=True, exist_ok=True)
+    with ThreadPoolExecutor(workers) as ex, open(ckpt, "a", encoding="utf-8") as fh:
+        futures = {ex.submit(work, r): r for r in todo}
+        for fut in as_completed(futures):
+            r, o = futures[fut], fut.result()
+            done[r["seq"]] = o
+            finished += 1
+            if not o.get("transient"):
+                fh.write(json.dumps(_dump_out(r["seq"], o)) + "\n")
+                fh.flush()
+            if workers > 1 or len(todo) <= 100 or finished % 25 == 0:
+                rate = (time.perf_counter() - t_start) / finished
+                status = "ok" if "error" not in o else o["error"][:60]
+                print(f"[{arm}] {len(done)}/{len(rows)} seq {r['seq']} ({r['template']}) {o['latency']:.0f}s {status}"
+                      f" | ETA {rate * (len(todo) - finished) / 60:.0f} min", file=sys.stderr, flush=True)
+    outs = [done[r["seq"]] for r in rows]
 
     # ---- phase 2: sequential audit (duplicate detection needs order) and scoring
     per_type = defaultdict(lambda: dict(tp=0, fn=0, fp=0))
@@ -238,6 +292,7 @@ def main(argv=None):
     ap.add_argument("--limit", type=int, default=0, help="only the first N invoices (keeps API cost down)")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--out", default=str(HERE / "results"))
+    ap.add_argument("--fresh", action="store_true", help="ignore any checkpoint and start over")
     a = ap.parse_args(argv)
     report = run(a)
     out = Path(a.out)
@@ -246,6 +301,7 @@ def main(argv=None):
     (out / f"{stem}.json").write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
     md = to_markdown(report)
     (out / f"{stem}.md").write_text(md, encoding="utf-8")
+    (out / f".ckpt_{stem}.jsonl").unlink(missing_ok=True)  # run complete; a rerun should start fresh
     print(md)
     return report
 
