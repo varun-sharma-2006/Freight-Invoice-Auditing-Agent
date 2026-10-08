@@ -1,0 +1,1646 @@
+{
+  "arm": "llm_only",
+  "split": "test",
+  "n_invoices": 60,
+  "generated_at": "2026-10-08T13:27:11+00:00",
+  "model": "gemma-4-26b-a4b-it",
+  "failures": 4,
+  "routed_to_review": 4,
+  "extraction": null,
+  "detection": {
+    "overall": {
+      "tp": 44,
+      "fn": 15,
+      "fp": 23,
+      "recall": 74.6,
+      "precision": 65.7
+    },
+    "per_type": {
+      "calculation_error": {
+        "tp": 4,
+        "fn": 4,
+        "fp": 0,
+        "recall": 50.0,
+        "precision": 100.0
+      },
+      "currency_tax": {
+        "tp": 7,
+        "fn": 3,
+        "fp": 0,
+        "recall": 70.0,
+        "precision": 100.0
+      },
+      "detention_demurrage": {
+        "tp": 2,
+        "fn": 2,
+        "fp": 6,
+        "recall": 50.0,
+        "precision": 25.0
+      },
+      "duplicate_line": {
+        "tp": 11,
+        "fn": 0,
+        "fp": 0,
+        "recall": 100.0,
+        "precision": 100.0
+      },
+      "expired_rate": {
+        "tp": 4,
+        "fn": 2,
+        "fp": 0,
+        "recall": 66.7,
+        "precision": 100.0
+      },
+      "unauthorized_charge": {
+        "tp": 9,
+        "fn": 2,
+        "fp": 1,
+        "recall": 81.8,
+        "precision": 90.0
+      },
+      "wrong_rate": {
+        "tp": 7,
+        "fn": 2,
+        "fp": 16,
+        "recall": 77.8,
+        "precision": 30.4
+      }
+    }
+  },
+  "false_alarms": {
+    "clean_lines": 349,
+    "flagged_clean_lines": 19,
+    "clean_line_false_alarm_rate": 5.4,
+    "clean_invoices": 21,
+    "flagged_clean_invoices": 2,
+    "clean_invoice_false_alarm_rate": 9.5
+  },
+  "money_usd": {
+    "injected_overcharge": 25797.16,
+    "correctly_identified": 19532.65,
+    "identified_pct": 75.7,
+    "falsely_claimed": 7029.59
+  },
+  "cost": {
+    "total_usd": 0.0,
+    "per_invoice_usd": 0.0,
+    "input_tokens": 501172,
+    "output_tokens": 224272
+  },
+  "latency_s": {
+    "mean": 288.95,
+    "p50": 90.673,
+    "p95": 2479.576
+  },
+  "invoices": [
+    {
+      "seq": 1,
+      "file": "0001_OML-INV-2026-005621.pdf",
+      "template": "T3",
+      "labels": [
+        {
+          "type": "duplicate_line",
+          "line_no": 5,
+          "detail": "repeat of THC_DEST",
+          "overcharge": 302.0
+        }
+      ],
+      "findings": [
+        {
+          "type": "duplicate_line",
+          "line_no": 5,
+          "diff": 302.0,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 74.141
+    },
+    {
+      "seq": 2,
+      "file": "0002_TGF-26-01222.pdf",
+      "template": "T3",
+      "labels": [
+        {
+          "type": "unauthorized_charge",
+          "line_no": 3,
+          "detail": "CURRENCY_ADJUSTMENT",
+          "overcharge": 350.0
+        }
+      ],
+      "findings": [],
+      "missed": [
+        "unauthorized_charge"
+      ],
+      "false": [],
+      "error": null,
+      "latency": 26.635
+    },
+    {
+      "seq": 3,
+      "file": "0003_OML-INV-2026-005629.pdf",
+      "template": "T2",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 231.856
+    },
+    {
+      "seq": 4,
+      "file": "0004_HSL260005274.pdf",
+      "template": "T5",
+      "labels": [
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "detail": "tax 0.18 applied",
+          "overcharge": 1758.56
+        }
+      ],
+      "findings": [
+        {
+          "type": "unauthorized_charge",
+          "line_no": 6,
+          "diff": 372.0,
+          "rule": "llm_only"
+        },
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "diff": 1758.56,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [
+        "unauthorized_charge"
+      ],
+      "error": null,
+      "latency": 75.809
+    },
+    {
+      "seq": 5,
+      "file": "0005_BW-26-08095.pdf",
+      "template": "T1",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 51.215
+    },
+    {
+      "seq": 6,
+      "file": "0006_TGF-26-01244.pdf",
+      "template": "T2",
+      "labels": [
+        {
+          "type": "wrong_rate",
+          "line_no": 5,
+          "detail": "rate 10.00 -> 11.99",
+          "overcharge": 3.98
+        }
+      ],
+      "findings": [
+        {
+          "type": "wrong_rate",
+          "line_no": 5,
+          "diff": 3.98,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 77.179
+    },
+    {
+      "seq": 7,
+      "file": "0007_OML-INV-2026-005664.pdf",
+      "template": "T5",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 781.611
+    },
+    {
+      "seq": 8,
+      "file": "0008_TGF-26-01258.pdf",
+      "template": "T3",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 5.96
+    },
+    {
+      "seq": 9,
+      "file": "0009_TGF-26-01282.pdf",
+      "template": "T3",
+      "labels": [
+        {
+          "type": "unauthorized_charge",
+          "line_no": 6,
+          "detail": "CURRENCY_ADJUSTMENT",
+          "overcharge": 462.0
+        }
+      ],
+      "findings": [
+        {
+          "type": "wrong_rate",
+          "line_no": 1,
+          "diff": 1114.14,
+          "rule": "llm_only"
+        },
+        {
+          "type": "wrong_rate",
+          "line_no": 2,
+          "diff": 24.34,
+          "rule": "llm_only"
+        },
+        {
+          "type": "wrong_rate",
+          "line_no": 3,
+          "diff": 11.12,
+          "rule": "llm_only"
+        },
+        {
+          "type": "wrong_rate",
+          "line_no": 4,
+          "diff": 11.12,
+          "rule": "llm_only"
+        },
+        {
+          "type": "wrong_rate",
+          "line_no": 6,
+          "diff": 11.12,
+          "rule": "llm_only"
+        },
+        {
+          "type": "unauthorized_charge",
+          "line_no": 6,
+          "diff": 40300.26,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [
+        "wrong_rate",
+        "wrong_rate",
+        "wrong_rate",
+        "wrong_rate",
+        "wrong_rate"
+      ],
+      "error": null,
+      "latency": 489.356
+    },
+    {
+      "seq": 10,
+      "file": "0010_BW-26-08100.pdf",
+      "template": "T2",
+      "labels": [
+        {
+          "type": "calculation_error",
+          "line_no": 1,
+          "detail": "amount != qty x rate",
+          "overcharge": 156.62
+        }
+      ],
+      "findings": [
+        {
+          "type": "wrong_rate",
+          "line_no": 1,
+          "diff": 194.04,
+          "rule": "llm_only"
+        },
+        {
+          "type": "calculation_error",
+          "line_no": 1,
+          "diff": 156.62,
+          "rule": "llm_only"
+        },
+        {
+          "type": "wrong_rate",
+          "line_no": 2,
+          "diff": 24.04,
+          "rule": "llm_only"
+        },
+        {
+          "type": "wrong_rate",
+          "line_no": 6,
+          "diff": 15.0,
+          "rule": "llm_only"
+        },
+        {
+          "type": "wrong_rate",
+          "line_no": 6,
+          "diff": 10.0,
+          "rule": "llm_only"
+        },
+        {
+          "type": "wrong_rate",
+          "line_no": 7,
+          "diff": 8.0,
+          "rule": "llm_only"
+        },
+        {
+          "type": "wrong_rate",
+          "line_no": 8,
+          "diff": 72.0,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [
+        "wrong_rate",
+        "wrong_rate",
+        "wrong_rate",
+        "wrong_rate",
+        "wrong_rate",
+        "wrong_rate"
+      ],
+      "error": null,
+      "latency": 79.022
+    },
+    {
+      "seq": 11,
+      "file": "0011_OML-INV-2026-005665.pdf",
+      "template": "T3",
+      "labels": [],
+      "findings": [
+        {
+          "type": "detention_demurrage",
+          "line_no": 7,
+          "diff": 284.0,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [
+        "detention_demurrage"
+      ],
+      "error": null,
+      "latency": 104.346
+    },
+    {
+      "seq": 12,
+      "file": "0012_HSL260005313.pdf",
+      "template": "T3",
+      "labels": [
+        {
+          "type": "calculation_error",
+          "line_no": 2,
+          "detail": "amount != qty x rate",
+          "overcharge": 88.84
+        },
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "detail": "tax 0.18 applied",
+          "overcharge": 1234.91
+        }
+      ],
+      "findings": [
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "diff": 1234.91,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [
+        "calculation_error"
+      ],
+      "false": [],
+      "error": null,
+      "latency": 75.544
+    },
+    {
+      "seq": 13,
+      "file": "0013_BW-26-08134.pdf",
+      "template": "T4",
+      "labels": [
+        {
+          "type": "duplicate_line",
+          "line_no": 3,
+          "detail": "repeat of FUEL_SURCHARGE",
+          "overcharge": 1059.62
+        },
+        {
+          "type": "unauthorized_charge",
+          "line_no": 6,
+          "detail": "WAR_RISK",
+          "overcharge": 252.0
+        }
+      ],
+      "findings": [
+        {
+          "type": "duplicate_line",
+          "line_no": 3,
+          "diff": 1059.62,
+          "rule": "llm_only"
+        },
+        {
+          "type": "unauthorized_charge",
+          "line_no": 6,
+          "diff": 252.0,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 77.306
+    },
+    {
+      "seq": 14,
+      "file": "0014_BW-26-08151.pdf",
+      "template": "T3",
+      "labels": [
+        {
+          "type": "wrong_rate",
+          "line_no": 1,
+          "detail": "rate 1042.07 -> 1179.24",
+          "overcharge": 274.34
+        },
+        {
+          "type": "duplicate_line",
+          "line_no": 6,
+          "detail": "repeat of ISPS",
+          "overcharge": 30.0
+        }
+      ],
+      "findings": [
+        {
+          "type": "wrong_rate",
+          "line_no": 3,
+          "diff": 40.0,
+          "rule": "llm_only"
+        },
+        {
+          "type": "wrong_rate",
+          "line_no": 4,
+          "diff": 5.0,
+          "rule": "llm_only"
+        },
+        {
+          "type": "wrong_rate",
+          "line_no": 5,
+          "diff": 10.0,
+          "rule": "llm_only"
+        },
+        {
+          "type": "duplicate_line",
+          "line_no": 6,
+          "diff": 30.0,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [
+        "wrong_rate"
+      ],
+      "false": [
+        "wrong_rate",
+        "wrong_rate",
+        "wrong_rate"
+      ],
+      "error": null,
+      "latency": 147.605
+    },
+    {
+      "seq": 15,
+      "file": "0015_HSL260005344.pdf",
+      "template": "T4",
+      "labels": [
+        {
+          "type": "duplicate_line",
+          "line_no": 7,
+          "detail": "repeat of ISPS",
+          "overcharge": 30.0
+        }
+      ],
+      "findings": [
+        {
+          "type": "duplicate_line",
+          "line_no": 7,
+          "diff": 30.0,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 86.224
+    },
+    {
+      "seq": 16,
+      "file": "0016_OML-INV-2026-005675.pdf",
+      "template": "T5",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 76.503
+    },
+    {
+      "seq": 17,
+      "file": "0017_OML-INV-2026-005694.pdf",
+      "template": "T5",
+      "labels": [
+        {
+          "type": "expired_rate",
+          "line_no": 2,
+          "detail": "used 2026-01-01..2026-06-30 rate 534.01",
+          "overcharge": 128.84
+        }
+      ],
+      "findings": [
+        {
+          "type": "expired_rate",
+          "line_no": 2,
+          "diff": 128.84,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 167.007
+    },
+    {
+      "seq": 18,
+      "file": "0018_OML-INV-2026-005707.pdf",
+      "template": "T5",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": "ServerError: 500 INTERNAL. {'error': {'code': 500, 'message': 'Internal error encountered.', 'status': 'INTERNAL'}}",
+      "latency": 2479.576
+    },
+    {
+      "seq": 19,
+      "file": "0019_TGF-26-01304.pdf",
+      "template": "T5",
+      "labels": [
+        {
+          "type": "unauthorized_charge",
+          "line_no": 5,
+          "detail": "CONGESTION",
+          "overcharge": 82.0
+        }
+      ],
+      "findings": [
+        {
+          "type": "unauthorized_charge",
+          "line_no": 5,
+          "diff": 82.0,
+          "rule": "llm_only"
+        },
+        {
+          "type": "detention_demurrage",
+          "line_no": 8,
+          "diff": 448.0,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [
+        "detention_demurrage"
+      ],
+      "error": null,
+      "latency": 80.972
+    },
+    {
+      "seq": 20,
+      "file": "0020_HSL260005369.pdf",
+      "template": "T3",
+      "labels": [
+        {
+          "type": "expired_rate",
+          "line_no": 1,
+          "detail": "used 2026-01-01..2026-06-30 rate 2035.73",
+          "overcharge": 743.19
+        },
+        {
+          "type": "calculation_error",
+          "line_no": null,
+          "detail": "total != subtotal + tax",
+          "overcharge": 35.98
+        },
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "detail": "tax 0.18 applied",
+          "overcharge": 1539.1
+        }
+      ],
+      "findings": [
+        {
+          "type": "expired_rate",
+          "line_no": 1,
+          "diff": 743.19,
+          "rule": "llm_only"
+        },
+        {
+          "type": "detention_demurrage",
+          "line_no": 6,
+          "diff": 364.0,
+          "rule": "llm_only"
+        },
+        {
+          "type": "detention_demurrage",
+          "line_no": 7,
+          "diff": 138.0,
+          "rule": "llm_only"
+        },
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "diff": 1539.1,
+          "rule": "llm_only"
+        },
+        {
+          "type": "calculation_error",
+          "line_no": null,
+          "diff": 35.98,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [
+        "detention_demurrage",
+        "detention_demurrage"
+      ],
+      "error": null,
+      "latency": 212.26
+    },
+    {
+      "seq": 21,
+      "file": "0021_OML-INV-2026-005728.pdf",
+      "template": "T3",
+      "labels": [],
+      "findings": [
+        {
+          "type": "detention_demurrage",
+          "line_no": 9,
+          "diff": 720.0,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [
+        "detention_demurrage"
+      ],
+      "error": null,
+      "latency": 372.588
+    },
+    {
+      "seq": 22,
+      "file": "0022_TGF-26-01314.pdf",
+      "template": "T4",
+      "labels": [
+        {
+          "type": "duplicate_line",
+          "line_no": 4,
+          "detail": "repeat of THC_ORIGIN",
+          "overcharge": 184.0
+        },
+        {
+          "type": "unauthorized_charge",
+          "line_no": 5,
+          "detail": "WAR_RISK",
+          "overcharge": 316.0
+        }
+      ],
+      "findings": [
+        {
+          "type": "duplicate_line",
+          "line_no": 4,
+          "diff": 184.0,
+          "rule": "llm_only"
+        },
+        {
+          "type": "unauthorized_charge",
+          "line_no": 5,
+          "diff": 316.0,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 119.562
+    },
+    {
+      "seq": 23,
+      "file": "0023_BW-26-08172.pdf",
+      "template": "T1",
+      "labels": [
+        {
+          "type": "unauthorized_charge",
+          "line_no": 8,
+          "detail": "CONGESTION",
+          "overcharge": 192.0
+        }
+      ],
+      "findings": [
+        {
+          "type": "unauthorized_charge",
+          "line_no": 8,
+          "diff": 192.0,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 142.646
+    },
+    {
+      "seq": 24,
+      "file": "0024_HSL260005379.pdf",
+      "template": "T5",
+      "labels": [
+        {
+          "type": "duplicate_line",
+          "line_no": 3,
+          "detail": "repeat of FUEL_SURCHARGE",
+          "overcharge": 883.46
+        }
+      ],
+      "findings": [
+        {
+          "type": "duplicate_line",
+          "line_no": 3,
+          "diff": 883.46,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 51.92
+    },
+    {
+      "seq": 25,
+      "file": "0025_HSL260005410.pdf",
+      "template": "T5",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 56.16
+    },
+    {
+      "seq": 26,
+      "file": "0026_TGF-26-01352.pdf",
+      "template": "T2",
+      "labels": [
+        {
+          "type": "calculation_error",
+          "line_no": 2,
+          "detail": "amount != qty x rate",
+          "overcharge": 30.46
+        }
+      ],
+      "findings": [],
+      "missed": [
+        "calculation_error"
+      ],
+      "false": [],
+      "error": "ReadTimeout: The read operation timed out",
+      "latency": 2453.541
+    },
+    {
+      "seq": 27,
+      "file": "0027_HSL260005436.pdf",
+      "template": "T3",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 111.978
+    },
+    {
+      "seq": 28,
+      "file": "0028_BW-26-08180.pdf",
+      "template": "T1",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 90.196
+    },
+    {
+      "seq": 29,
+      "file": "0029_TGF-26-01385.pdf",
+      "template": "T4",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 194.534
+    },
+    {
+      "seq": 30,
+      "file": "0030_OML-INV-2026-005746.pdf",
+      "template": "T4",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 79.343
+    },
+    {
+      "seq": 31,
+      "file": "0031_TGF-26-01391.pdf",
+      "template": "T3",
+      "labels": [
+        {
+          "type": "detention_demurrage",
+          "line_no": 7,
+          "detail": "free days not deducted",
+          "overcharge": 322.0
+        }
+      ],
+      "findings": [],
+      "missed": [
+        "detention_demurrage"
+      ],
+      "false": [],
+      "error": null,
+      "latency": 5.671
+    },
+    {
+      "seq": 32,
+      "file": "0032_HSL260005470.pdf",
+      "template": "T2",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 121.367
+    },
+    {
+      "seq": 33,
+      "file": "0033_TGF-26-01400.pdf",
+      "template": "T3",
+      "labels": [
+        {
+          "type": "wrong_rate",
+          "line_no": 1,
+          "detail": "rate 1581.31 -> 1686.62",
+          "overcharge": 105.31
+        },
+        {
+          "type": "calculation_error",
+          "line_no": 4,
+          "detail": "amount != qty x rate",
+          "overcharge": 59.02
+        },
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "detail": "fx 90.90 vs agreed 87.23",
+          "overcharge": 94.77
+        }
+      ],
+      "findings": [
+        {
+          "type": "wrong_rate",
+          "line_no": 1,
+          "diff": 105.31,
+          "rule": "llm_only"
+        },
+        {
+          "type": "calculation_error",
+          "line_no": 4,
+          "diff": 59.02,
+          "rule": "llm_only"
+        },
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "diff": 95.49,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 233.905
+    },
+    {
+      "seq": 34,
+      "file": "0034_HSL260005509.pdf",
+      "template": "T5",
+      "labels": [
+        {
+          "type": "wrong_rate",
+          "line_no": 2,
+          "detail": "rate 577.86 -> 634.21",
+          "overcharge": 112.7
+        }
+      ],
+      "findings": [
+        {
+          "type": "wrong_rate",
+          "line_no": 2,
+          "diff": 112.7,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 90.673
+    },
+    {
+      "seq": 35,
+      "file": "0035_OML-INV-2026-005748.pdf",
+      "template": "T4",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 5.342
+    },
+    {
+      "seq": 36,
+      "file": "0036_BW-27-08194.pdf",
+      "template": "T5",
+      "labels": [
+        {
+          "type": "detention_demurrage",
+          "line_no": 6,
+          "detail": "free days not deducted",
+          "overcharge": 882.0
+        }
+      ],
+      "findings": [],
+      "missed": [
+        "detention_demurrage"
+      ],
+      "false": [],
+      "error": null,
+      "latency": 42.327
+    },
+    {
+      "seq": 37,
+      "file": "0037_BW-26-08228.pdf",
+      "template": "T1",
+      "labels": [
+        {
+          "type": "wrong_rate",
+          "line_no": 5,
+          "detail": "rate 10.00 -> 11.31",
+          "overcharge": 2.62
+        },
+        {
+          "type": "unauthorized_charge",
+          "line_no": 8,
+          "detail": "CURRENCY_ADJUSTMENT",
+          "overcharge": 400.0
+        }
+      ],
+      "findings": [
+        {
+          "type": "wrong_rate",
+          "line_no": 5,
+          "diff": 2.62,
+          "rule": "llm_only"
+        },
+        {
+          "type": "detention_demurrage",
+          "line_no": 7,
+          "diff": 432.0,
+          "rule": "llm_only"
+        },
+        {
+          "type": "unauthorized_charge",
+          "line_no": 8,
+          "diff": 400.0,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [
+        "detention_demurrage"
+      ],
+      "error": null,
+      "latency": 318.123
+    },
+    {
+      "seq": 38,
+      "file": "0038_BW-26-08250.pdf",
+      "template": "T4",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 72.367
+    },
+    {
+      "seq": 39,
+      "file": "0039_TGF-26-01408.pdf",
+      "template": "T3",
+      "labels": [
+        {
+          "type": "expired_rate",
+          "line_no": 1,
+          "detail": "used 2026-01-01..2026-06-30 rate 2447.45",
+          "overcharge": 202.45
+        }
+      ],
+      "findings": [],
+      "missed": [
+        "expired_rate"
+      ],
+      "false": [],
+      "error": null,
+      "latency": 5.203
+    },
+    {
+      "seq": 40,
+      "file": "0040_HSL260005516.pdf",
+      "template": "T3",
+      "labels": [
+        {
+          "type": "unauthorized_charge",
+          "line_no": 8,
+          "detail": "CONGESTION",
+          "overcharge": 65.0
+        }
+      ],
+      "findings": [
+        {
+          "type": "unauthorized_charge",
+          "line_no": 8,
+          "diff": 65.0,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 139.467
+    },
+    {
+      "seq": 41,
+      "file": "0041_OML-INV-2026-005764.pdf",
+      "template": "T3",
+      "labels": [
+        {
+          "type": "expired_rate",
+          "line_no": 2,
+          "detail": "used 2026-01-01..2026-06-30 rate 182.08",
+          "overcharge": 39.44
+        }
+      ],
+      "findings": [
+        {
+          "type": "expired_rate",
+          "line_no": 2,
+          "diff": 39.44,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 75.84
+    },
+    {
+      "seq": 42,
+      "file": "0042_HSL260005530.pdf",
+      "template": "T2",
+      "labels": [
+        {
+          "type": "calculation_error",
+          "line_no": 4,
+          "detail": "amount != qty x rate",
+          "overcharge": 38.26
+        },
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "detail": "tax 0.05 applied",
+          "overcharge": 246.22
+        }
+      ],
+      "findings": [
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "diff": 246.22,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [
+        "calculation_error"
+      ],
+      "false": [],
+      "error": null,
+      "latency": 113.422
+    },
+    {
+      "seq": 43,
+      "file": "0043_HSL260005561.pdf",
+      "template": "T3",
+      "labels": [
+        {
+          "type": "duplicate_line",
+          "line_no": 2,
+          "detail": "repeat of BASE_FREIGHT",
+          "overcharge": 3670.52
+        },
+        {
+          "type": "wrong_rate",
+          "line_no": 6,
+          "detail": "rate 12.00 -> 14.03",
+          "overcharge": 2.03
+        },
+        {
+          "type": "calculation_error",
+          "line_no": null,
+          "detail": "total != subtotal + tax",
+          "overcharge": 102.31
+        }
+      ],
+      "findings": [
+        {
+          "type": "duplicate_line",
+          "line_no": 2,
+          "diff": 3670.52,
+          "rule": "llm_only"
+        },
+        {
+          "type": "wrong_rate",
+          "line_no": 6,
+          "diff": 2.03,
+          "rule": "llm_only"
+        },
+        {
+          "type": "calculation_error",
+          "line_no": null,
+          "diff": 102.31,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 120.551
+    },
+    {
+      "seq": 44,
+      "file": "0044_OML-INV-2026-005768.pdf",
+      "template": "T2",
+      "labels": [
+        {
+          "type": "unauthorized_charge",
+          "line_no": 7,
+          "detail": "CONGESTION",
+          "overcharge": 657.0
+        }
+      ],
+      "findings": [
+        {
+          "type": "unauthorized_charge",
+          "line_no": 7,
+          "diff": 657.0,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 78.933
+    },
+    {
+      "seq": 45,
+      "file": "0045_TGF-26-01417.pdf",
+      "template": "T5",
+      "labels": [
+        {
+          "type": "wrong_rate",
+          "line_no": 3,
+          "detail": "rate 185.00 -> 196.73",
+          "overcharge": 11.73
+        },
+        {
+          "type": "duplicate_line",
+          "line_no": 5,
+          "detail": "repeat of DOC_FEE",
+          "overcharge": 55.0
+        }
+      ],
+      "findings": [
+        {
+          "type": "wrong_rate",
+          "line_no": 3,
+          "diff": 11.73,
+          "rule": "llm_only"
+        },
+        {
+          "type": "duplicate_line",
+          "line_no": 5,
+          "diff": 55.0,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 121.587
+    },
+    {
+      "seq": 46,
+      "file": "0046_BW-26-08265.pdf",
+      "template": "T3",
+      "labels": [
+        {
+          "type": "expired_rate",
+          "line_no": 1,
+          "detail": "used 2026-01-01..2026-06-30 rate 2401.96",
+          "overcharge": 226.96
+        },
+        {
+          "type": "detention_demurrage",
+          "line_no": 7,
+          "detail": "free days not deducted",
+          "overcharge": 441.0
+        }
+      ],
+      "findings": [
+        {
+          "type": "expired_rate",
+          "line_no": 1,
+          "diff": 226.96,
+          "rule": "llm_only"
+        },
+        {
+          "type": "detention_demurrage",
+          "line_no": 7,
+          "diff": 441.0,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 154.48
+    },
+    {
+      "seq": 47,
+      "file": "0047_OML-INV-2026-005780.pdf",
+      "template": "T2",
+      "labels": [
+        {
+          "type": "duplicate_line",
+          "line_no": 3,
+          "detail": "repeat of FUEL_SURCHARGE",
+          "overcharge": 657.48
+        },
+        {
+          "type": "wrong_rate",
+          "line_no": 4,
+          "detail": "rate 176.00 -> 190.98",
+          "overcharge": 29.96
+        },
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "detail": "tax 0.18 applied",
+          "overcharge": 1260.9
+        }
+      ],
+      "findings": [
+        {
+          "type": "duplicate_line",
+          "line_no": 3,
+          "diff": 657.48,
+          "rule": "llm_only"
+        },
+        {
+          "type": "wrong_rate",
+          "line_no": 4,
+          "diff": 29.96,
+          "rule": "llm_only"
+        },
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "diff": 1260.9,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 90.297
+    },
+    {
+      "seq": 48,
+      "file": "0048_HSL260005584.pdf",
+      "template": "T4",
+      "labels": [
+        {
+          "type": "duplicate_line",
+          "line_no": 3,
+          "detail": "repeat of FUEL_SURCHARGE",
+          "overcharge": 974.48
+        }
+      ],
+      "findings": [
+        {
+          "type": "duplicate_line",
+          "line_no": 3,
+          "diff": 974.48,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 97.776
+    },
+    {
+      "seq": 49,
+      "file": "0049_OML-INV-2026-005792.pdf",
+      "template": "T5",
+      "labels": [
+        {
+          "type": "duplicate_line",
+          "line_no": 4,
+          "detail": "repeat of THC_ORIGIN",
+          "overcharge": 120.0
+        },
+        {
+          "type": "unauthorized_charge",
+          "line_no": 6,
+          "detail": "WAR_RISK",
+          "overcharge": 272.0
+        }
+      ],
+      "findings": [
+        {
+          "type": "duplicate_line",
+          "line_no": 4,
+          "diff": 120.0,
+          "rule": "llm_only"
+        },
+        {
+          "type": "unauthorized_charge",
+          "line_no": 6,
+          "diff": 272.0,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 137.704
+    },
+    {
+      "seq": 50,
+      "file": "0050_OML-INV-2026-005809.pdf",
+      "template": "T2",
+      "labels": [
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "detail": "fx 90.31 vs agreed 85.28",
+          "overcharge": 719.1
+        }
+      ],
+      "findings": [],
+      "missed": [
+        "currency_tax"
+      ],
+      "false": [],
+      "error": "ReadTimeout: The read operation timed out",
+      "latency": 2724.853
+    },
+    {
+      "seq": 51,
+      "file": "0051_BW-26-08284.pdf",
+      "template": "T3",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 44.711
+    },
+    {
+      "seq": 52,
+      "file": "0052_BW-26-08295.pdf",
+      "template": "T4",
+      "labels": [
+        {
+          "type": "expired_rate",
+          "line_no": 1,
+          "detail": "used 2026-01-01..2026-06-30 rate 3189.05",
+          "overcharge": 744.1
+        }
+      ],
+      "findings": [
+        {
+          "type": "wrong_rate",
+          "line_no": 1,
+          "diff": 2028.1,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [
+        "expired_rate"
+      ],
+      "false": [
+        "wrong_rate"
+      ],
+      "error": null,
+      "latency": 398.634
+    },
+    {
+      "seq": 53,
+      "file": "0053_TGF-26-01438.pdf",
+      "template": "T3",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 52.91
+    },
+    {
+      "seq": 54,
+      "file": "0054_HSL260005614.pdf",
+      "template": "T1",
+      "labels": [
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "detail": "tax 0.18 applied",
+          "overcharge": 359.47
+        }
+      ],
+      "findings": [
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "diff": 359.44,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 106.566
+    },
+    {
+      "seq": 55,
+      "file": "0055_HSL260005630.pdf",
+      "template": "T5",
+      "labels": [
+        {
+          "type": "calculation_error",
+          "line_no": 3,
+          "detail": "amount != qty x rate",
+          "overcharge": 114.7
+        },
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "detail": "tax 0.18 applied",
+          "overcharge": 642.06
+        }
+      ],
+      "findings": [],
+      "missed": [
+        "calculation_error",
+        "currency_tax"
+      ],
+      "false": [],
+      "error": "ReadTimeout: The read operation timed out",
+      "latency": 2485.118
+    },
+    {
+      "seq": 56,
+      "file": "0056_OML-INV-2026-005835.pdf",
+      "template": "T1",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 50.769
+    },
+    {
+      "seq": 57,
+      "file": "0057_OML-INV-2026-005860.pdf",
+      "template": "T4",
+      "labels": [
+        {
+          "type": "wrong_rate",
+          "line_no": 3,
+          "detail": "rate 154.00 -> 184.78",
+          "overcharge": 61.56
+        },
+        {
+          "type": "unauthorized_charge",
+          "line_no": 6,
+          "detail": "CURRENCY_ADJUSTMENT",
+          "overcharge": 474.0
+        },
+        {
+          "type": "currency_tax",
+          "line_no": null,
+          "detail": "tax 0.18 applied",
+          "overcharge": 1320.61
+        }
+      ],
+      "findings": [],
+      "missed": [
+        "wrong_rate",
+        "unauthorized_charge",
+        "currency_tax"
+      ],
+      "false": [],
+      "error": null,
+      "latency": 4.147
+    },
+    {
+      "seq": 58,
+      "file": "0058_TGF-26-01449.pdf",
+      "template": "T4",
+      "labels": [
+        {
+          "type": "detention_demurrage",
+          "line_no": 7,
+          "detail": "wrong daily rate",
+          "overcharge": 172.5
+        }
+      ],
+      "findings": [
+        {
+          "type": "wrong_rate",
+          "line_no": 2,
+          "diff": 693.57,
+          "rule": "llm_only"
+        },
+        {
+          "type": "detention_demurrage",
+          "line_no": 7,
+          "diff": 526.5,
+          "rule": "llm_only"
+        }
+      ],
+      "missed": [],
+      "false": [
+        "wrong_rate"
+      ],
+      "error": null,
+      "latency": 271.757
+    },
+    {
+      "seq": 59,
+      "file": "0059_BW-26-08322.pdf",
+      "template": "T5",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 48.962
+    },
+    {
+      "seq": 60,
+      "file": "0060_HSL260005661.pdf",
+      "template": "T4",
+      "labels": [],
+      "findings": [],
+      "missed": [],
+      "false": [],
+      "error": null,
+      "latency": 50.96
+    }
+  ]
+}

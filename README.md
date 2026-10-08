@@ -107,9 +107,11 @@ The Gemini Flash models were overloaded (503) and then over quota on the free-ti
 |---|---|---|---|---|---|---|
 | Offline parser + rules | 77.3% | 79.7% | **100%** | 80.4% | **USD 0** | 14 |
 | **Gemma extraction + rules (hybrid)** | **90.6%** | **89.8%** | 98.1% | **92.8%** | USD 138 | 16 |
-| Gemma does everything (LLM-only) | n/a | _pending_ | _pending_ | _pending_ | _pending_ | |
+| Gemma does everything (LLM-only) | n/a | 74.6% | 65.7% | 75.7% | USD 7,029.59 | 4 |
 
-<!-- from evals/results/test_hybrid_heuristic_n60.md and test_hybrid_gemini_n60.md, 2026-10-08 -->
+<!-- from evals/results/test_hybrid_heuristic_n60.md, test_hybrid_gemini_n60.md, test_llm_only_n60.md, 2026-10-08 -->
+
+**The hybrid wins where it matters.** With the same model reading the same PDFs, letting the LLM also judge the invoice cut precision from 98.1% to 65.7%: 23 false findings instead of 1, and USD 7,029.59 of false claims against the carrier instead of USD 138. Most LLM-only false alarms were rate judgements (`wrong_rate` precision 30.4%, 16 false) and detention arithmetic (`detention_demurrage` precision 25.0%, 6 false). Those are exactly the comparisons and calculations the rule engine takes away from the model. Where the task is mostly pattern-spotting (duplicate lines, 11/11 at 100% precision in both arms), the LLM-only arm does fine.
 
 - **Gemma closes most of the T5 gap.** It reads the unruled held-out layout that the offline parser cannot.
 - **All 5 Gemma failures are T2 invoices** where the extracted container type couldn't be normalised. They went to review rather than being guessed. This is a fixable mapping gap, deliberately left untuned because it was found on the test split.
@@ -124,7 +126,7 @@ GEMINI_MODEL=gemma-4-26b-a4b-it python -m evals.run_eval --split test --extracto
 GEMINI_MODEL=gemma-4-26b-a4b-it python -m evals.run_eval --split test --mode llm_only --limit 60 --workers 2
 ```
 
-The hypothesis is that hybrid ≥ LLM-only on precision and money accuracy. The LLM-only row is filled in from its result file. If it disagrees with the hypothesis, that is what gets reported.
+The 4 LLM-only failures were API errors (3 read timeouts and 1 HTTP 500 on the free tier), not model output; they count as missed errors. They lower that arm's recall slightly but don't affect its precision. The LLM-only arm was also given the correct contract and the ground-truth prior invoices, an advantage the hybrid didn't get.
 
 Caveat on fairness: the `llm_only` arm is given the correct contract and ground-truth prior invoices. The hybrid arm must find the contract from its own extraction. That favours the LLM-only arm.
 
