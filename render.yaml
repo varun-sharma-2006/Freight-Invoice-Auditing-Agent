@@ -2,12 +2,16 @@ services:
   - type: web
     name: freight-audit-api
     runtime: docker
+    plan: free
     dockerfilePath: backend/Dockerfile
     dockerContext: .
+    healthCheckPath: /api/health
     envVars:
+      # Leave blank for the public demo: the app then runs fully offline (fast, free, no quota to burn).
       - key: GEMINI_API_KEY
         sync: false
+      # Set to your Vercel URL after the frontend is deployed, e.g. https://freight-invoice-auditor.vercel.app
       - key: CORS_ORIGINS
-        value: https://your-frontend.vercel.app
-      # SQLite on Render's disk is ephemeral; set DATABASE_URL to a Postgres URL for persistence
-      # (and add psycopg[binary] to requirements.txt).
+        sync: false
+      # SQLite on Render's free disk is ephemeral (resets on redeploy/sleep); fine for a demo.
+      # For persistence set DATABASE_URL to a Postgres URL and add psycopg[binary] to requirements.txt.
