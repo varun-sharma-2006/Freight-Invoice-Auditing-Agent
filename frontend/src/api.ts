@@ -84,8 +84,43 @@ export interface AuditEvent {
   hash: string;
 }
 
+// ---- session -------------------------------------------------------------
+export interface SessionUser {
+  email: string;
+  name: string;
+  role: string;
+}
+const TOKEN_KEY = "fa_session";
+let token: string | null = null;
+try {
+  token = localStorage.getItem(TOKEN_KEY);
+} catch {
+  /* storage unavailable: session lasts for this tab only */
+}
+export const session = {
+  get token() {
+    return token;
+  },
+  set(t: string | null) {
+    token = t;
+    try {
+      if (t) localStorage.setItem(TOKEN_KEY, t);
+      else localStorage.removeItem(TOKEN_KEY);
+    } catch {
+      /* ignore */
+    }
+  },
+};
+export const onUnauthorized = new EventTarget();
+
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
-  const r = await fetch(API + path, init);
+  const headers = new Headers(init?.headers);
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  const r = await fetch(API + path, { ...init, headers });
+  if (r.status === 401 && !path.startsWith("/api/auth/login")) {
+    session.set(null);
+    onUnauthorized.dispatchEvent(new Event("logout"));
+  }
   if (!r.ok) {
     let msg = r.statusText;
     try {
@@ -105,6 +140,10 @@ const json = (method: string, body: unknown): RequestInit => ({
 });
 
 export const api = {
+  authConfig: () => req<{ demo: { email: string; password: string } | null }>("/api/auth/config"),
+  login: (email: string, password: string) =>
+    req<{ token: string; user: SessionUser }>("/api/auth/login", json("POST", { email, password })),
+  me: () => req<SessionUser>("/api/auth/me"),
   health: () => req<{ llm_configured: boolean; model: string; extractor: string }>("/api/health"),
   contracts: () => req<{ id: string; carrier: string; valid_from: string; valid_to: string; rates: number }[]>("/api/contracts"),
   seed: () => req<{ loaded: string[] }>("/api/demo/seed", { method: "POST" }),
@@ -124,7 +163,7 @@ export const api = {
   },
   invoices: () => req<InvoiceSummary[]>("/api/invoices"),
   invoice: (id: number) => req<InvoiceDetail>(`/api/invoices/${id}`),
-  pdfUrl: (id: number) => `${API}/api/invoices/${id}/pdf`,
+  pdfUrl: (id: number) => `${API}/api/invoices/${id}/pdf?token=${encodeURIComponent(token ?? "")}`,
   setFinding: (id: number, status: string, actor: string) => req<InvoiceDetail>(`/api/findings/${id}`, json("PATCH", { status, actor })),
   markReviewed: (id: number, actor: string) => req<InvoiceDetail>(`/api/invoices/${id}/reviewed`, json("POST", { actor })),
   draft: (invoiceId: number, actor: string) => req<Dispute>(`/api/invoices/${invoiceId}/dispute`, json("POST", { actor })),

@@ -6,14 +6,14 @@ import os
 from collections.abc import Iterator
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from . import agent, services
+from . import agent, auth, services
 from .config import ROOT, get_settings
 from .db import AuditEvent, ContractRow, DisputeRow, InvoiceRow, session_factory, verify_chain
 from .models import Contract
@@ -26,6 +26,25 @@ _GENERATED = ROOT / "data" / "synthetic"
 SAMPLES = _GENERATED if (_GENERATED / "contracts").is_dir() else ROOT / "backend" / "demo_data"
 EVAL_RESULTS = ROOT / "backend" / "evals" / "results"
 MAX_UPLOAD_BYTES = 10_000_000  # public demo: refuse oversized uploads
+PUBLIC_API = {"/api/health", "/api/auth/login", "/api/auth/config"}
+
+
+@app.middleware("http")
+async def require_login(request: Request, call_next):
+    """Every /api route except login/health needs a valid signed token (Bearer header, or ?token= for the PDF viewer)."""
+    path = request.url.path
+    if request.method != "OPTIONS" and path.startswith("/api/") and path not in PUBLIC_API:
+        header = request.headers.get("authorization", "")
+        token = header[7:] if header.lower().startswith("bearer ") else request.query_params.get("token")
+        user = auth.verify(token)
+        if user is None:
+            return JSONResponse({"detail": "Not signed in"}, status_code=401)
+        request.state.user = user
+    return await call_next(request)
+
+
+def me(request: Request) -> auth.User:
+    return request.state.user
 
 
 _seeded = False
@@ -106,20 +125,45 @@ def health():
     return dict(ok=True, llm_configured=bool(s.api_key), model=s.gemini_model, extractor=s.extractor)
 
 
+# ------------------------------------------------------------------ auth
+class LoginIn(BaseModel):
+    email: str
+    password: str
+
+
+@app.post("/api/auth/login")
+def login(body: LoginIn):
+    res = auth.login(body.email, body.password)
+    if res is None:
+        raise HTTPException(401, "Invalid email or password")
+    token, user = res
+    return dict(token=token, user=dict(email=user.email, name=user.name, role=user.role))
+
+
+@app.get("/api/auth/config")
+def auth_config():
+    return dict(demo=auth.demo_credentials())
+
+
+@app.get("/api/auth/me")
+def whoami(user: auth.User = Depends(me)):
+    return dict(email=user.email, name=user.name, role=user.role)
+
+
 # ------------------------------------------------------------------ contracts
 @app.post("/api/contracts")
-def create_contract(contract: Contract, s: Session = Depends(db)):
-    services.upsert_contract(s, contract, actor="api")
+def create_contract(contract: Contract, s: Session = Depends(db), user: auth.User = Depends(me)):
+    services.upsert_contract(s, contract, actor=user.name)
     return dict(contract_id=contract.contract_id, rates=len(contract.rates))
 
 
 @app.post("/api/contracts/upload")
-async def upload_contract(file: UploadFile = File(...), s: Session = Depends(db)):
+async def upload_contract(file: UploadFile = File(...), s: Session = Depends(db), user: auth.User = Depends(me)):
     try:
         contract = Contract.model_validate_json(await file.read())
     except ValueError as e:
         raise HTTPException(422, f"Invalid contract JSON: {e}") from e
-    services.upsert_contract(s, contract, actor="api")
+    services.upsert_contract(s, contract, actor=user.name)
     return dict(contract_id=contract.contract_id, rates=len(contract.rates))
 
 
@@ -139,12 +183,12 @@ def get_contract(contract_id: str, s: Session = Depends(db)):
 
 # ------------------------------------------------------------------ demo helpers
 @app.post("/api/demo/seed")
-def seed(s: Session = Depends(db)):
+def seed(s: Session = Depends(db), user: auth.User = Depends(me)):
     files = sorted((SAMPLES / "contracts").glob("*.json"))
     if not files:
         raise HTTPException(404, "No synthetic contracts. Run: python -m synth.generator")
     for p in files:
-        services.upsert_contract(s, Contract.model_validate_json(p.read_text(encoding="utf-8")), actor="demo_seed")
+        services.upsert_contract(s, Contract.model_validate_json(p.read_text(encoding="utf-8")), actor=user.name)
     return dict(loaded=[p.stem for p in files])
 
 
@@ -158,25 +202,26 @@ def samples(split: str = "test", limit: int = 40):
 
 
 @app.post("/api/demo/samples/{split}/{name}")
-def process_sample(split: str, name: str, s: Session = Depends(db)):
+def process_sample(split: str, name: str, s: Session = Depends(db), user: auth.User = Depends(me)):
     path = (SAMPLES / split / name).resolve()
     if path.parent != (SAMPLES / split).resolve() or not path.is_file():
         raise HTTPException(404, "sample not found")
-    row, created = services.process_invoice(s, path.read_bytes(), name, actor="demo")
+    row, created = services.process_invoice(s, path.read_bytes(), name, actor=user.name)
     return dict(created=created, invoice=invoice_detail(row))
 
 
 # ------------------------------------------------------------------ invoices
 @app.post("/api/invoices")
 async def upload_invoice(file: UploadFile = File(...), contract_id: str | None = Form(None),
-                         extractor: str | None = Form(None), s: Session = Depends(db)):
+                         extractor: str | None = Form(None), s: Session = Depends(db),
+                         user: auth.User = Depends(me)):
     data = await file.read(MAX_UPLOAD_BYTES + 1)
     if len(data) > MAX_UPLOAD_BYTES:
         raise HTTPException(413, f"PDF larger than {MAX_UPLOAD_BYTES // 1_000_000} MB")
     if not data.startswith(b"%PDF"):
         raise HTTPException(415, "Please upload a PDF")
     row, created = services.process_invoice(s, data, file.filename or "invoice.pdf", contract_id or None,
-                                            extractor or None, actor="api")
+                                            extractor or None, actor=user.name)
     return dict(created=created, invoice=invoice_detail(row))
 
 
@@ -210,7 +255,7 @@ def invoice_pdf(invoice_id: int, s: Session = Depends(db)):
 
 
 class Actor(BaseModel):
-    actor: str = "reviewer"
+    actor: str | None = None  # ignored: the signed-in user is always the actor
 
 
 class FindingStatus(Actor):
@@ -218,21 +263,21 @@ class FindingStatus(Actor):
 
 
 @app.patch("/api/findings/{finding_id}")
-def update_finding(finding_id: int, body: FindingStatus, s: Session = Depends(db)):
-    f = wf(services.set_finding_status, s, finding_id, body.status, body.actor)
+def update_finding(finding_id: int, body: FindingStatus, s: Session = Depends(db), user: auth.User = Depends(me)):
+    f = wf(services.set_finding_status, s, finding_id, body.status, user.name)
     return invoice_detail(_invoice(s, f.invoice_id))
 
 
 @app.post("/api/invoices/{invoice_id}/reviewed")
-def reviewed(invoice_id: int, body: Actor, s: Session = Depends(db)):
-    wf(services.mark_reviewed, s, invoice_id, body.actor)
+def reviewed(invoice_id: int, body: Actor, s: Session = Depends(db), user: auth.User = Depends(me)):
+    wf(services.mark_reviewed, s, invoice_id, user.name)
     return invoice_detail(_invoice(s, invoice_id))
 
 
 # ------------------------------------------------------------------ disputes
 @app.post("/api/invoices/{invoice_id}/dispute")
-def create_dispute(invoice_id: int, body: Actor, s: Session = Depends(db)):
-    d = wf(services.draft_dispute, s, invoice_id, body.actor)
+def create_dispute(invoice_id: int, body: Actor, s: Session = Depends(db), user: auth.User = Depends(me)):
+    d = wf(services.draft_dispute, s, invoice_id, user.name)
     return dispute_view(d)
 
 
@@ -242,28 +287,28 @@ class DisputeEdit(Actor):
 
 
 class Review(BaseModel):
-    reviewer: str
+    reviewer: str | None = None  # ignored: approvals are recorded under the signed-in user
     comment: str | None = None
 
 
 @app.put("/api/disputes/{dispute_id}")
-def edit_dispute(dispute_id: int, body: DisputeEdit, s: Session = Depends(db)):
-    return dispute_view(wf(services.edit_dispute, s, dispute_id, body.subject, body.body, body.actor))
+def edit_dispute(dispute_id: int, body: DisputeEdit, s: Session = Depends(db), user: auth.User = Depends(me)):
+    return dispute_view(wf(services.edit_dispute, s, dispute_id, body.subject, body.body, user.name))
 
 
 @app.post("/api/disputes/{dispute_id}/approve")
-def approve(dispute_id: int, body: Review, s: Session = Depends(db)):
-    return dispute_view(wf(services.approve_dispute, s, dispute_id, body.reviewer, body.comment))
+def approve(dispute_id: int, body: Review, s: Session = Depends(db), user: auth.User = Depends(me)):
+    return dispute_view(wf(services.approve_dispute, s, dispute_id, user.name, body.comment))
 
 
 @app.post("/api/disputes/{dispute_id}/reject")
-def reject(dispute_id: int, body: Review, s: Session = Depends(db)):
-    return dispute_view(wf(services.reject_dispute, s, dispute_id, body.reviewer, body.comment))
+def reject(dispute_id: int, body: Review, s: Session = Depends(db), user: auth.User = Depends(me)):
+    return dispute_view(wf(services.reject_dispute, s, dispute_id, user.name, body.comment))
 
 
 @app.post("/api/disputes/{dispute_id}/send")
-def send(dispute_id: int, body: Actor, s: Session = Depends(db)):
-    return dispute_view(wf(services.send_dispute, s, dispute_id, body.actor))
+def send(dispute_id: int, body: Actor, s: Session = Depends(db), user: auth.User = Depends(me)):
+    return dispute_view(wf(services.send_dispute, s, dispute_id, user.name))
 
 
 # ------------------------------------------------------------------ audit log & agent

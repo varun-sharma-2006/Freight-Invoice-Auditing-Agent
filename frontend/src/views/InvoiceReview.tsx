@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, money, ERROR_LABELS, type Dispute, type Finding, type InvoiceDetail } from "../api";
-import { Badge, Button, Card, Stat, StatusBadge } from "../ui";
+import { Badge, Button, Card, Icon, Kpi, Skeleton, StatusBadge } from "../ui";
+
+function extractionLabel(m: string | null) {
+  if (!m) return "Failed";
+  if (m.startsWith("heuristic")) return m.includes("fallback") ? "Offline parser (LLM fallback)" : "Offline parser";
+  return m.replace(/^gemini:/, "LLM · ");
+}
 
 export default function InvoiceReview({ id, reviewer }: { id: number; reviewer: string }) {
   const [inv, setInv] = useState<InvoiceDetail | null>(null);
@@ -11,51 +17,67 @@ export default function InvoiceReview({ id, reviewer }: { id: number; reviewer: 
     load();
   }, [load]);
 
-  if (err) return <div className="rounded-lg bg-rose-50 p-4 text-rose-800">{err}</div>;
-  if (!inv) return <div className="text-slate-500">Loading…</div>;
+  if (err) return <div className="rounded-xl bg-rose-50 p-4 text-sm text-rose-800 ring-1 ring-rose-200">{err}</div>;
+  if (!inv)
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-72" />
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">{[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-24" />)}</div>
+        <Skeleton className="h-96" />
+      </div>
+    );
 
   const actor = reviewer || "reviewer";
   const flagged = new Map<number, Finding[]>();
   inv.finding_list.forEach((f) => f.line_no && flagged.set(f.line_no, [...(flagged.get(f.line_no) ?? []), f]));
   const open = inv.finding_list.filter((f) => f.status !== "dismissed");
   const head = (inv.invoice ?? {}) as Record<string, string | number | null>;
+  const overcharge = open.reduce((s, f) => s + f.difference, 0);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <a href="#/" className="text-sm text-slate-500 hover:text-slate-800">← Invoices</a>
-        <h1 className="text-xl font-semibold">{inv.invoice_number ?? inv.filename}</h1>
-        <StatusBadge status={inv.status} />
-        <span className="text-sm text-slate-500">{inv.carrier}</span>
-        <div className="ml-auto flex gap-2">
-          <Button variant="ghost" onClick={() => setShowPdf((v) => !v)}>{showPdf ? "Hide PDF" : "Show PDF"}</Button>
-          {inv.status === "needs_review" && inv.invoice && (
-            <Button onClick={() => api.markReviewed(inv.id, actor).then(setInv)} title="Confirm you have verified the flagged fields">
-              Mark reviewed
-            </Button>
-          )}
+    <div className="space-y-6">
+      <div>
+        <a href="#/" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-indigo-600"><Icon name="arrow" className="h-3.5 w-3.5" /> All invoices</a>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{inv.invoice_number ?? inv.filename}</h1>
+          <StatusBadge status={inv.status} />
+          {inv.dispute && <StatusBadge status={inv.dispute.status} />}
+          <div className="ml-auto flex gap-2">
+            <Button variant="ghost" onClick={() => setShowPdf((v) => !v)}><Icon name="doc" /> {showPdf ? "Hide document" : "Show document"}</Button>
+            {inv.status === "needs_review" && inv.invoice && (
+              <Button onClick={() => api.markReviewed(inv.id, actor).then(setInv)} title="Confirm you have verified the flagged fields">
+                <Icon name="check" /> Mark reviewed
+              </Button>
+            )}
+          </div>
         </div>
+        <p className="mt-1 text-sm text-slate-500">
+          {[inv.carrier, inv.bl_number && `B/L ${inv.bl_number}`, inv.contract_id && `Contract ${inv.contract_id}`, inv.invoice_date].filter(Boolean).join("  ·  ")}
+        </p>
       </div>
 
       {inv.review_notes.length > 0 && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          <div className="mb-1 font-medium">{inv.status === "needs_review" ? "Needs human review" : "Notes"}</div>
-          <ul className="list-disc space-y-0.5 pl-5">{inv.review_notes.map((n, i) => <li key={i}>{n}</li>)}</ul>
+        <div className={`flex gap-3 rounded-xl px-4 py-3 text-sm ring-1 ring-inset ${inv.status === "needs_review" ? "bg-amber-50 text-amber-900 ring-amber-200" : "bg-slate-50 text-slate-700 ring-slate-200"}`}>
+          <Icon name="alert" className="mt-0.5 h-4 w-4 flex-none" />
+          <div>
+            <div className="font-medium">{inv.status === "needs_review" ? "Needs human review" : "Notes"}</div>
+            <ul className="mt-1 list-disc space-y-0.5 pl-4">{inv.review_notes.map((n, i) => <li key={i}>{n}</li>)}</ul>
+          </div>
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Invoice total" value={money(inv.total, inv.currency ?? "")} />
-        <Stat label="Findings" value={open.length} />
-        <Stat label="Disputed overcharge" value={money(open.reduce((s, f) => s + f.difference, 0), "USD")} hint="contract currency" />
-        <Stat label="Extraction" value={<span className="text-sm">{inv.extraction_method ?? "failed"}</span>}
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        <Kpi label="Invoice total" value={money(inv.total, inv.currency ?? "")} icon="doc" />
+        <Kpi label="Findings" value={open.length} icon="alert" tone={open.length ? "rose" : "emerald"} hint={open.length ? "Rule-engine discrepancies" : "Matches the contract"} />
+        <Kpi label="Disputed overcharge" value={money(overcharge, "USD")} icon="send" tone="rose" hint="In contract currency" />
+        <Kpi label="Extraction" value={<span className="text-base">{extractionLabel(inv.extraction_method)}</span>} icon="spark" tone="indigo"
           hint={`${inv.latency_s.toFixed(2)}s${inv.cost_usd ? ` · $${inv.cost_usd.toFixed(4)}` : ""}`} />
       </div>
 
       <div className={`grid gap-4 ${showPdf ? "xl:grid-cols-2" : ""}`}>
         {showPdf && (
-          <Card title="Source document" className="xl:sticky xl:top-20 xl:self-start">
-            <iframe title="invoice pdf" src={api.pdfUrl(inv.id)} className="h-[78vh] w-full rounded-md border border-slate-200" />
+          <Card title="Source document" subtitle={inv.filename} className="xl:sticky xl:top-6 xl:self-start">
+            <iframe title="invoice pdf" src={api.pdfUrl(inv.id)} className="h-[78vh] w-full rounded-lg bg-slate-100" />
           </Card>
         )}
         <div className="space-y-4">
@@ -203,7 +225,7 @@ function DisputePanel({ inv, reviewer, onChange }: { inv: InvoiceDetail; reviewe
             {editable && <Button disabled={busy} onClick={() => act(() => api.draft(inv.id, actor))}>Redraft</Button>}
             {d.status === "draft" && (
               <Button variant="primary" disabled={busy || !!dirty || !reviewer}
-                title={!reviewer ? "Enter your name as reviewer (top right)" : dirty ? "Save edits first" : ""}
+                title={dirty ? "Save edits first" : `Approve as ${reviewer}`}
                 onClick={() => act(() => api.approve(d.id, reviewer, comment || undefined))}>
                 Approve
               </Button>
@@ -216,8 +238,7 @@ function DisputePanel({ inv, reviewer, onChange }: { inv: InvoiceDetail; reviewe
               Send (mock)
             </Button>
           </div>
-          {!reviewer && d.status === "draft" && <p className="text-xs text-amber-700">Enter your name in the Reviewer box (top right) to approve.</p>}
-          {d.status === "sent" && <p className="text-xs text-emerald-700">Saved to outbox: <span className="font-mono">{d.outbox_path}</span>. No real email was sent.</p>}
+          {d.status === "sent" && <p className="flex items-center gap-1.5 text-xs text-emerald-700"><Icon name="check" className="h-3.5 w-3.5" /> Delivered to the mock outbox. Approved by {d.reviewer}; no real email was sent.</p>}
           {err && <p className="text-sm text-rose-700">{err}</p>}
         </div>
       )}

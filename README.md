@@ -148,6 +148,13 @@ Caveat on fairness: the `llm_only` arm is given the correct contract and ground-
 - `dd/mm/yyyy` is assumed for ambiguous dates (Indian convention).
 - The audit hash chain detects tampering through the app, but isn't a WORM store. Concurrent writers could race on the chain head, so use a DB-level sequence or lock in production.
 
+## Authentication
+
+- **Sign-in is required for every API route** except `/api/health` and the login endpoints. The API issues HMAC-SHA256-signed session tokens that expire after 12 hours (`freight_audit/auth.py`). Tokens are stateless, so they verify on any serverless instance.
+- **Accounts:** set `AUTH_USERS="email:password:Display Name:role;..."`. When it isn't set, a single demo reviewer is active and its credentials appear on the login page for evaluators: `reviewer@freightaudit.demo` / `demo-review-2026`.
+- **Production:** set `AUTH_SECRET` to a long random string. The built-in fallback is only for local use and the public demo.
+- **Approvals carry the signed-in identity.** Edits, approvals, rejections and sends are recorded under the signed-in reviewer's name (also in the email's `X-Approved-By` header). A name sent by the client is ignored.
+
 ## Safety & trust
 
 - **Human approval required**: `send` returns 409 unless a named reviewer approved the dispute. Sending is a mock that writes an `.eml` to `data/outbox/` with an `X-Approved-By` header.

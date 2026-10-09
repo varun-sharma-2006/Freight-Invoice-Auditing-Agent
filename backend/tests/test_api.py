@@ -9,8 +9,12 @@ from synth.templates import render_invoice
 
 
 @pytest.fixture
-def client(contracts):
+def client(contracts, monkeypatch):
+    monkeypatch.setenv("AUTO_SEED", "0")
     c = TestClient(api.app)
+    demo = c.get("/api/auth/config").json()["demo"]
+    token = c.post("/api/auth/login", json=demo).json()["token"]
+    c.headers["Authorization"] = f"Bearer {token}"
     for k in contracts:
         assert c.post("/api/contracts", content=k.model_dump_json(),
                       headers={"content-type": "application/json"}).status_code == 200
@@ -54,7 +58,8 @@ def test_full_review_workflow(client, factory):
     assert sent["status"] == "sent" and sent["outbox_path"].endswith(".eml")
     with open(sent["outbox_path"], encoding="utf-8") as fh:
         eml = fh.read()
-    assert "X-Approved-By: ana" in eml and "PO-77" in eml
+    # The approver is the signed-in user, not whatever name the client sends.
+    assert "X-Approved-By: Alex Morgan" in eml and "PO-77" in eml
 
     actions = [e["action"] for e in client.get("/api/audit").json()]
     for a in ("uploaded", "extracted", "audited", "drafted", "edited", "approved", "sent_mock"):
@@ -112,3 +117,22 @@ def test_agent_offline_router(client, factory):
                                              "invoice_id": inv["id"]}).json()
     assert r["mode"] == "offline" and inv["invoice_number"] in r["answer"]
     assert r["tool_calls"][0]["tool"] == "check_invoice"
+
+
+def test_api_requires_login(contracts):
+    c = TestClient(api.app)
+    assert c.get("/api/health").status_code == 200
+    assert c.get("/api/invoices").status_code == 401
+    assert c.get("/api/invoices", headers={"Authorization": "Bearer forged.token"}).status_code == 401
+    assert c.post("/api/auth/login", json={"email": "reviewer@freightaudit.demo", "password": "wrong"}).status_code == 401
+
+
+def test_tampered_or_expired_token_rejected(monkeypatch):
+    from freight_audit import auth
+
+    token, _ = auth.login(**auth.demo_credentials())
+    payload, sig = token.rsplit(".", 1)
+    assert auth.verify(token).name == "Alex Morgan"
+    assert auth.verify(payload[:-2] + "xx." + sig) is None
+    monkeypatch.setattr(auth.time, "time", lambda: 10**12)
+    assert auth.verify(token) is None
