@@ -22,6 +22,7 @@ app.add_middleware(CORSMiddleware, allow_origins=[o.strip() for o in get_setting
                    allow_methods=["*"], allow_headers=["*"])
 SAMPLES = ROOT / "data" / "synthetic"
 EVAL_RESULTS = ROOT / "backend" / "evals" / "results"
+MAX_UPLOAD_BYTES = 10_000_000  # public demo: refuse oversized uploads
 
 
 def db() -> Iterator[Session]:
@@ -149,7 +150,9 @@ def process_sample(split: str, name: str, s: Session = Depends(db)):
 @app.post("/api/invoices")
 async def upload_invoice(file: UploadFile = File(...), contract_id: str | None = Form(None),
                          extractor: str | None = Form(None), s: Session = Depends(db)):
-    data = await file.read()
+    data = await file.read(MAX_UPLOAD_BYTES + 1)
+    if len(data) > MAX_UPLOAD_BYTES:
+        raise HTTPException(413, f"PDF larger than {MAX_UPLOAD_BYTES // 1_000_000} MB")
     if not data.startswith(b"%PDF"):
         raise HTTPException(415, "Please upload a PDF")
     row, created = services.process_invoice(s, data, file.filename or "invoice.pdf", contract_id or None,
