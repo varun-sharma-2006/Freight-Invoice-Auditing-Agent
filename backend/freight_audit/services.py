@@ -94,7 +94,8 @@ def process_invoice(s: Session, pdf: bytes, filename: str, contract_id: str | No
     settings.upload_dir.mkdir(parents=True, exist_ok=True)
     path = settings.upload_dir / f"{sha[:16]}.pdf"
     path.write_bytes(pdf)
-    row = InvoiceRow(file_sha256=sha, filename=filename, source_path=str(path), status="processing", review_notes=[])
+    row = InvoiceRow(file_sha256=sha, filename=filename, source_path=str(path), file_bytes=pdf,
+                     status="processing", review_notes=[])
     s.add(row)
     s.flush()
     log_event(s, "invoice", row.id, "uploaded", actor, filename=filename, sha256=sha)

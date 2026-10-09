@@ -7,12 +7,14 @@ from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parents[2]
+# Serverless (Vercel): the deployment is read-only except /tmp, which is wiped on cold start.
+WRITABLE = Path("/tmp/freight_audit") if os.getenv("VERCEL") else ROOT / "data"
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=(ROOT / ".env", ROOT / "backend" / ".env"), extra="ignore")
 
-    database_url: str = f"sqlite:///{(ROOT / 'data' / 'freight_audit.db').as_posix()}"
+    database_url: str = f"sqlite:///{(WRITABLE / 'freight_audit.db').as_posix()}"
     # Gemini. GOOGLE_API_KEY or GEMINI_API_KEY is picked up; leave empty to run fully offline.
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-3.8-flash"
@@ -22,8 +24,8 @@ class Settings(BaseSettings):
     llm_price_in: float = 0.30
     llm_price_out: float = 2.50
     llm_timeout_s: float = 120.0
-    outbox_dir: Path = ROOT / "data" / "outbox"
-    upload_dir: Path = ROOT / "data" / "uploads"
+    outbox_dir: Path = WRITABLE / "outbox"
+    upload_dir: Path = WRITABLE / "uploads"
     cors_origins: str = "http://localhost:5173"
     dispute_from: str = "freight-audit@example.com"
 

@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import json
+import os
 from collections.abc import Iterator
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -20,13 +21,32 @@ from .models import Contract
 app = FastAPI(title="Freight Invoice Auditing Agent", version="1.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=[o.strip() for o in get_settings().cors_origins.split(",")],
                    allow_methods=["*"], allow_headers=["*"])
-SAMPLES = ROOT / "data" / "synthetic"
+# Full generated set locally; the small committed set (backend/demo_data) on serverless deploys.
+_GENERATED = ROOT / "data" / "synthetic"
+SAMPLES = _GENERATED if (_GENERATED / "contracts").is_dir() else ROOT / "backend" / "demo_data"
 EVAL_RESULTS = ROOT / "backend" / "evals" / "results"
 MAX_UPLOAD_BYTES = 10_000_000  # public demo: refuse oversized uploads
 
 
+_seeded = False
+
+
+def _auto_seed(s: Session) -> None:
+    """A fresh serverless instance starts with an empty DB: load the demo contracts once per process."""
+    global _seeded
+    if _seeded:
+        return
+    _seeded = True
+    if os.getenv("AUTO_SEED", "1") == "0" or s.scalar(select(ContractRow.id).limit(1)):
+        return
+    for p in sorted((SAMPLES / "contracts").glob("*.json")):
+        services.upsert_contract(s, Contract.model_validate_json(p.read_text(encoding="utf-8")), actor="auto_seed")
+    s.commit()
+
+
 def db() -> Iterator[Session]:
     s = session_factory()()
+    _auto_seed(s)
     try:
         yield s
         s.commit()
@@ -180,6 +200,9 @@ def get_invoice(invoice_id: int, s: Session = Depends(db)):
 @app.get("/api/invoices/{invoice_id}/pdf")
 def invoice_pdf(invoice_id: int, s: Session = Depends(db)):
     r = _invoice(s, invoice_id)
+    if r.file_bytes:
+        return Response(r.file_bytes, media_type="application/pdf",
+                        headers={"Content-Disposition": f'inline; filename="{r.filename}"'})
     if not r.source_path or not Path(r.source_path).exists():
         raise HTTPException(404, "file not stored")
     return FileResponse(r.source_path, media_type="application/pdf", filename=r.filename,

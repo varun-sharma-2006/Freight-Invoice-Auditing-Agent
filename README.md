@@ -179,9 +179,15 @@ Configuration lives in `.env.example`. With no `GEMINI_API_KEY`/`GOOGLE_API_KEY`
 
 ## Deploy
 
+- **Vercel (free Hobby plan, no card), one project for UI + API.** Import the repo with the root directory left as the repo root. `vercel.json` builds the React app and runs the FastAPI app as a Python function (`api/index.py`). Every `/api/*` request goes to that function, and every other path to the UI. Things to know about serverless:
+  - Only `/tmp` is writable, so the SQLite database lives there and resets on a cold start.
+  - The demo contracts load automatically on a fresh instance, from the small committed set in `backend/demo_data/` (4 contracts, 42 invoices).
+  - Uploaded PDFs are stored in the database, so the viewer works across requests.
+  - For data that persists, set `DATABASE_URL` to a free Postgres (e.g. Neon) and add `psycopg[binary]` to the root `requirements.txt`.
+  - Vercel caps request bodies at about 4.5 MB.
 - **One container, free, no card: Hugging Face Spaces.** The root `Dockerfile` builds the React UI and serves it from FastAPI on port 7860, so a single Docker Space hosts the whole app. The YAML header at the top of this README is the Space config. Push this repo to the Space's git remote.
 - **Backend**: `render.yaml` + `backend/Dockerfile` (bakes in a small synthetic demo set). Set `GEMINI_API_KEY`, `CORS_ORIGINS`, and a Postgres `DATABASE_URL` for persistence.
-- **Frontend**: Vercel, root `frontend/`, env `VITE_API_URL=https://<your-backend>`.
+- **Split deploy** (backend elsewhere): build `frontend/` with `VITE_API_URL=https://<your-backend>`.
 - **CI**: `.github/workflows/ci.yml` runs the tests, regenerates the data, runs the offline eval on the test split (posted to the job summary), fails if precision drops below 99%, and builds the frontend.
 
 ## Layout

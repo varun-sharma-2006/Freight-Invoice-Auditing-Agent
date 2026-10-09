@@ -13,7 +13,7 @@ from datetime import date, datetime, timezone
 from decimal import Decimal
 
 from sqlalchemy import (
-    JSON, Date, DateTime, Float, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint, create_engine, event,
+    JSON, Date, DateTime, Float, ForeignKey, Integer, LargeBinary, Numeric, String, Text, UniqueConstraint, create_engine, event,
     exc as sa_exc, select,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, relationship, sessionmaker
@@ -73,6 +73,7 @@ class InvoiceRow(Base):
     file_sha256: Mapped[str] = mapped_column(String(64), unique=True)  # idempotency key
     filename: Mapped[str] = mapped_column(String(300))
     source_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    file_bytes: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True, deferred=True)
     carrier: Mapped[str | None] = mapped_column(String(200), index=True, nullable=True)
     invoice_number: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
     invoice_date: Mapped[date | None] = mapped_column(Date, nullable=True)
