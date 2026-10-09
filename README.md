@@ -1,3 +1,14 @@
+---
+title: Freight Invoice Auditor
+emoji: 🚢
+colorFrom: blue
+colorTo: gray
+sdk: docker
+app_port: 7860
+pinned: false
+short_description: Audits freight invoices against carrier contracts
+---
+
 # Freight Invoice Auditing Agent
 
 Checks carrier freight invoices against the contracted rate sheet, flags overcharges with evidence, drafts a dispute email, and holds it for human approval before anything is sent.
@@ -168,6 +179,7 @@ Configuration lives in `.env.example`. With no `GEMINI_API_KEY`/`GOOGLE_API_KEY`
 
 ## Deploy
 
+- **One container, free, no card: Hugging Face Spaces.** The root `Dockerfile` builds the React UI and serves it from FastAPI on port 7860, so a single Docker Space hosts the whole app. The YAML header at the top of this README is the Space config. Push this repo to the Space's git remote.
 - **Backend**: `render.yaml` + `backend/Dockerfile` (bakes in a small synthetic demo set). Set `GEMINI_API_KEY`, `CORS_ORIGINS`, and a Postgres `DATABASE_URL` for persistence.
 - **Frontend**: Vercel, root `frontend/`, env `VITE_API_URL=https://<your-backend>`.
 - **CI**: `.github/workflows/ci.yml` runs the tests, regenerates the data, runs the offline eval on the test split (posted to the job summary), fails if precision drops below 99%, and builds the frontend.

@@ -279,3 +279,18 @@ def eval_results():
         r.pop("invoices", None)
         out.append(dict(name=p.stem, **r))
     return out
+
+
+# ------------------------------------------------------------------ bundled UI (single-container deploys)
+# When frontend/dist exists (built into the Docker image), serve the React app from the same origin as
+# the API, so one free container (e.g. a Hugging Face Space) hosts everything with no CORS setup.
+UI_DIST = ROOT / "frontend" / "dist"
+if UI_DIST.is_dir():
+    @app.get("/{path:path}", include_in_schema=False)
+    def ui(path: str):
+        if path.startswith("api/"):
+            raise HTTPException(404, "not found")
+        f = (UI_DIST / path).resolve()
+        if path and f.is_file() and UI_DIST.resolve() in f.parents:
+            return FileResponse(f)
+        return FileResponse(UI_DIST / "index.html")
