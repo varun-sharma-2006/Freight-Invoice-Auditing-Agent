@@ -40,10 +40,14 @@ def _accounts() -> dict[str, tuple[str, User]]:
 
 
 def demo_credentials() -> dict | None:
-    """Shown on the login page only while the built-in demo account is active."""
-    if "AUTH_USERS" in os.environ:
+    """Shown on the login page whenever the built-in demo account is still configured
+    (alone, or alongside real accounts in AUTH_USERS). AUTH_SHOW_DEMO=0 hides it."""
+    if os.getenv("AUTH_SHOW_DEMO", "1") == "0":
         return None
     email, password, *_ = DEMO_USERS.split(":")
+    acct = _accounts().get(email)
+    if acct is None or acct[0] != password:
+        return None
     return dict(email=email, password=password)
 
 

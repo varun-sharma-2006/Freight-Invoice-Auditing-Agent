@@ -136,3 +136,16 @@ def test_tampered_or_expired_token_rejected(monkeypatch):
     assert auth.verify(payload[:-2] + "xx." + sig) is None
     monkeypatch.setattr(auth.time, "time", lambda: 10**12)
     assert auth.verify(token) is None
+
+
+def test_demo_box_survives_real_accounts(monkeypatch):
+    from freight_audit import auth
+
+    monkeypatch.setenv("AUTH_USERS", "me@x.io:pw:Me:admin;" + auth.DEMO_USERS)
+    assert auth.demo_credentials()["email"] == "reviewer@freightaudit.demo"
+    assert auth.login("me@x.io", "pw")[1].role == "admin"
+    monkeypatch.setenv("AUTH_USERS", "me@x.io:pw:Me:admin")  # demo account removed -> no box
+    assert auth.demo_credentials() is None and auth.login(**{"email": "reviewer@freightaudit.demo", "password": "demo-review-2026"}) is None
+    monkeypatch.setenv("AUTH_USERS", "me@x.io:pw:Me:admin;" + auth.DEMO_USERS)
+    monkeypatch.setenv("AUTH_SHOW_DEMO", "0")
+    assert auth.demo_credentials() is None

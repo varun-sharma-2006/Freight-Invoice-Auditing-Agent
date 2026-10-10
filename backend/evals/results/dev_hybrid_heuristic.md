@@ -1,13 +1,13 @@
 ### hybrid_heuristic on `dev` (127 invoices)
 
-Generated 2026-10-07T10:43:57+00:00
+Generated 2026-10-10T09:25:46+00:00
 
 - Extraction field accuracy: **100.0%** (invoices extracted perfectly: 100.0%)
 - Detection: recall **100.0%**, precision **100.0%** (TP 146, FN 0, FP 0)
 - False alarms: 0.0% of clean lines, 0.0% of clean invoices
 - Money: injected USD 117,607.06, correctly identified USD 117,607.06 (100.0%), falsely claimed USD 0.00
 - Failures: 0, routed to review: 0
-- Cost: USD 0.0 total, USD 0.0/invoice; latency mean 0.082s, p95 0.118s
+- Cost: USD 0.0 total, USD 0.0/invoice; latency mean 0.095s, p95 0.138s
 
 | Error type | TP | FN | FP | Recall | Precision |
 |---|---|---|---|---|---|

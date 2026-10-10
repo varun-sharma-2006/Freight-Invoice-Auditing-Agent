@@ -1,3 +1,4 @@
+import json
 from datetime import date
 from decimal import Decimal as D
 
@@ -150,3 +151,26 @@ def test_engine_agrees_with_generator_labels(factory, contracts):
             assert abs(float(f.difference) - lab["overcharge"]) <= max(0.05, 0.002 * lab["overcharge"])
         history.append(PriorInvoice(i, g.invoice.invoice_number, g.invoice.carrier, g.invoice.bl_number,
                                     g.invoice.total, g.invoice.currency))
+
+
+def test_implausible_dates_send_dnd_to_review(contract, clean_invoice):
+    """A swapped/misread detention date must lower confidence so the claim goes to a human, not a carrier."""
+    from freight_audit.extraction.base import assemble
+
+    inv = clean_invoice
+    raw = json.loads(inv.model_dump_json())
+    raw["equipment_out"], raw["equipment_in"] = "2026-08-16", "2026-08-02"  # swapped
+    raw["lines"][3]["quantity"] = "28"  # detention looks over-billed under the swapped dates
+    raw["lines"][3]["amount"] = "1400"
+    got, notes = assemble(raw)
+    assert got.field_confidence["equipment_out"] < 0.8 and any("Implausible" in n for n in notes)
+    res = audit_invoice(got, contract)
+    assert res.needs_review
+    assert all(f.confidence < 0.8 for f in res.findings if f.error_type == ET.DETENTION_DEMURRAGE)
+
+
+def test_plausible_dates_keep_full_confidence(clean_invoice):
+    from freight_audit.extraction.base import assemble
+
+    got, notes = assemble(json.loads(clean_invoice.model_dump_json()))
+    assert all(v == 1.0 for v in got.field_confidence.values()) and not any("Implausible" in n for n in notes)

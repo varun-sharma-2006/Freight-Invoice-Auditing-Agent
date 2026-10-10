@@ -109,6 +109,8 @@ def run(args) -> dict:
     contracts = {p.stem: Contract.model_validate_json(p.read_text(encoding="utf-8"))
                  for p in (data / "contracts").glob("*.json")}
     rows = [json.loads(l) for l in open(data / args.split / "labels.jsonl", encoding="utf-8")]
+    if args.templates:
+        rows = [r for r in rows if r["template"] in args.templates.split(",")]
     if args.limit:
         rows = rows[: args.limit]
     pdfs = {r["seq"]: (data / args.split / r["file"]).read_bytes() for r in rows}
@@ -140,7 +142,8 @@ def run(args) -> dict:
     # Checkpoint: each finished invoice is appended to a JSONL file, so a long API run can be watched
     # (progress on stderr) and resumed after an interruption. Transient API failures are not saved,
     # so a resume retries them. --fresh discards the checkpoint.
-    ckpt = Path(args.out) / f".ckpt_{args.split}_{arm}{f'_n{args.limit}' if args.limit else ''}.jsonl"
+    tag = (f"_{args.templates.replace(',', '')}" if args.templates else "") + (f"_n{args.limit}" if args.limit else "")
+    ckpt = Path(args.out) / f".ckpt_{args.split}_{arm}{tag}.jsonl"
     done: dict[int, dict] = {}
     if ckpt.exists() and not args.fresh:
         for line in ckpt.read_text(encoding="utf-8").splitlines():
@@ -235,7 +238,7 @@ def run(args) -> dict:
     report = dict(
         arm=arm, split=args.split, n_invoices=len(rows), generated_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
         model=None if arm == "hybrid_heuristic" else __import__("freight_audit.config", fromlist=["x"]).get_settings().gemini_model,
-        failures=failures, routed_to_review=review,
+        failures=failures, failures_transient=sum(1 for o in outs if o.get("transient")), routed_to_review=review,
         extraction=None if args.mode == "llm_only" else dict(
             field_accuracy=pct(ext_ok, ext_n), perfect_invoices=pct(perfect, len(rows)),
             per_field={k: pct(*v) for k, v in sorted(per_field.items())}),
@@ -290,6 +293,7 @@ def main(argv=None):
     ap.add_argument("--mode", default="hybrid", choices=["hybrid", "llm_only"])
     ap.add_argument("--extractor", default="heuristic", choices=["heuristic", "gemini"])
     ap.add_argument("--limit", type=int, default=0, help="only the first N invoices (keeps API cost down)")
+    ap.add_argument("--templates", default="", help="only these layouts, e.g. T2,T5 (for diagnosis on dev)")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--out", default=str(HERE / "results"))
     ap.add_argument("--fresh", action="store_true", help="ignore any checkpoint and start over")
@@ -297,11 +301,16 @@ def main(argv=None):
     report = run(a)
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    stem = f"{a.split}_{report['arm']}" + (f"_n{a.limit}" if a.limit else "")
+    stem = f"{a.split}_{report['arm']}" + (f"_{a.templates.replace(',', '')}" if a.templates else "") + (f"_n{a.limit}" if a.limit else "")
     (out / f"{stem}.json").write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
     md = to_markdown(report)
     (out / f"{stem}.md").write_text(md, encoding="utf-8")
-    (out / f".ckpt_{stem}.jsonl").unlink(missing_ok=True)  # run complete; a rerun should start fresh
+    transient = report["failures_transient"]
+    if transient:  # keep the checkpoint: rerunning the same command retries only these invoices
+        print(f"{transient} invoice(s) failed on transient API errors; rerun the same command to retry them.",
+              file=sys.stderr)
+    else:
+        (out / f".ckpt_{stem}.jsonl").unlink(missing_ok=True)  # run complete; a rerun should start fresh
     print(md)
     return report
 

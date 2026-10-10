@@ -2,9 +2,10 @@
   "arm": "hybrid_heuristic",
   "split": "dev",
   "n_invoices": 127,
-  "generated_at": "2026-10-07T10:43:57+00:00",
+  "generated_at": "2026-10-10T09:25:46+00:00",
   "model": null,
   "failures": 0,
+  "failures_transient": 0,
   "routed_to_review": 0,
   "extraction": {
     "field_accuracy": 100.0,
@@ -123,9 +124,9 @@
     "output_tokens": 0
   },
   "latency_s": {
-    "mean": 0.082,
-    "p50": 0.077,
-    "p95": 0.118
+    "mean": 0.095,
+    "p50": 0.092,
+    "p95": 0.138
   },
   "invoices": [
     {
@@ -151,7 +152,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.097
+      "latency": 0.099
     },
     {
       "seq": 2,
@@ -162,7 +163,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.065
+      "latency": 0.071
     },
     {
       "seq": 3,
@@ -187,7 +188,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.067
+      "latency": 0.072
     },
     {
       "seq": 4,
@@ -212,7 +213,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.064
+      "latency": 0.071
     },
     {
       "seq": 5,
@@ -237,7 +238,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.068
+      "latency": 0.078
     },
     {
       "seq": 6,
@@ -273,7 +274,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.072
+      "latency": 0.075
     },
     {
       "seq": 8,
@@ -298,7 +299,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.073
+      "latency": 0.071
     },
     {
       "seq": 9,
@@ -309,7 +310,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.066
+      "latency": 0.076
     },
     {
       "seq": 10,
@@ -358,7 +359,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.066
+      "latency": 0.077
     },
     {
       "seq": 11,
@@ -395,7 +396,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.074
+      "latency": 0.105
     },
     {
       "seq": 12,
@@ -444,7 +445,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.082
+      "latency": 0.107
     },
     {
       "seq": 13,
@@ -469,7 +470,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.07
+      "latency": 0.08
     },
     {
       "seq": 14,
@@ -518,7 +519,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.109
+      "latency": 0.153
     },
     {
       "seq": 15,
@@ -543,7 +544,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.075
+      "latency": 0.099
     },
     {
       "seq": 16,
@@ -568,7 +569,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.058
+      "latency": 0.079
     },
     {
       "seq": 17,
@@ -605,7 +606,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.073
+      "latency": 0.115
     },
     {
       "seq": 18,
@@ -616,7 +617,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.064
+      "latency": 0.103
     },
     {
       "seq": 19,
@@ -627,7 +628,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.073
+      "latency": 0.138
     },
     {
       "seq": 20,
@@ -652,7 +653,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.071
+      "latency": 0.117
     },
     {
       "seq": 21,
@@ -677,7 +678,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.075
+      "latency": 0.138
     },
     {
       "seq": 22,
@@ -714,7 +715,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.061
+      "latency": 0.1
     },
     {
       "seq": 23,
@@ -739,7 +740,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.074
+      "latency": 0.125
     },
     {
       "seq": 24,
@@ -764,7 +765,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.066
+      "latency": 0.105
     },
     {
       "seq": 25,
@@ -789,7 +790,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.064
+      "latency": 0.099
     },
     {
       "seq": 26,
@@ -814,7 +815,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.083
+      "latency": 0.141
     },
     {
       "seq": 27,
@@ -825,7 +826,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.076
+      "latency": 0.124
     },
     {
       "seq": 28,
@@ -850,7 +851,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.082
+      "latency": 0.129
     },
     {
       "seq": 29,
@@ -861,7 +862,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.074
+      "latency": 0.129
     },
     {
       "seq": 30,
@@ -886,7 +887,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.057
+      "latency": 0.12
     },
     {
       "seq": 31,
@@ -897,7 +898,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.086
+      "latency": 0.125
     },
     {
       "seq": 32,
@@ -934,7 +935,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.069
+      "latency": 0.108
     },
     {
       "seq": 33,
@@ -945,7 +946,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.118
+      "latency": 0.184
     },
     {
       "seq": 34,
@@ -970,7 +971,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.084
+      "latency": 0.113
     },
     {
       "seq": 35,
@@ -981,7 +982,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.067
+      "latency": 0.091
     },
     {
       "seq": 36,
@@ -992,7 +993,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.073
+      "latency": 0.104
     },
     {
       "seq": 37,
@@ -1003,7 +1004,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.085
+      "latency": 0.11
     },
     {
       "seq": 38,
@@ -1052,7 +1053,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.086
+      "latency": 0.11
     },
     {
       "seq": 39,
@@ -1063,7 +1064,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.073
+      "latency": 0.101
     },
     {
       "seq": 40,
@@ -1088,7 +1089,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.079
+      "latency": 0.103
     },
     {
       "seq": 41,
@@ -1125,7 +1126,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.078
+      "latency": 0.082
     },
     {
       "seq": 42,
@@ -1150,7 +1151,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.071
+      "latency": 0.068
     },
     {
       "seq": 43,
@@ -1175,7 +1176,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.068
+      "latency": 0.072
     },
     {
       "seq": 44,
@@ -1200,7 +1201,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.071
+      "latency": 0.079
     },
     {
       "seq": 45,
@@ -1225,7 +1226,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.071
+      "latency": 0.08
     },
     {
       "seq": 46,
@@ -1250,7 +1251,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.09
+      "latency": 0.107
     },
     {
       "seq": 47,
@@ -1275,7 +1276,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.075
+      "latency": 0.085
     },
     {
       "seq": 48,
@@ -1286,7 +1287,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.076
+      "latency": 0.085
     },
     {
       "seq": 49,
@@ -1311,7 +1312,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.095
+      "latency": 0.082
     },
     {
       "seq": 50,
@@ -1348,7 +1349,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.083
+      "latency": 0.103
     },
     {
       "seq": 51,
@@ -1359,7 +1360,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.063
+      "latency": 0.071
     },
     {
       "seq": 52,
@@ -1370,7 +1371,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.115
+      "latency": 0.126
     },
     {
       "seq": 53,
@@ -1395,7 +1396,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.066
+      "latency": 0.079
     },
     {
       "seq": 54,
@@ -1432,7 +1433,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.069
+      "latency": 0.078
     },
     {
       "seq": 55,
@@ -1443,7 +1444,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.074
+      "latency": 0.077
     },
     {
       "seq": 56,
@@ -1468,7 +1469,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.073
+      "latency": 0.072
     },
     {
       "seq": 57,
@@ -1493,7 +1494,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.092
+      "latency": 0.093
     },
     {
       "seq": 58,
@@ -1542,7 +1543,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.083
+      "latency": 0.092
     },
     {
       "seq": 59,
@@ -1553,7 +1554,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.072
+      "latency": 0.079
     },
     {
       "seq": 60,
@@ -1602,7 +1603,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.079
+      "latency": 0.087
     },
     {
       "seq": 61,
@@ -1613,7 +1614,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.081
+      "latency": 0.09
     },
     {
       "seq": 62,
@@ -1662,7 +1663,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.078
+      "latency": 0.083
     },
     {
       "seq": 63,
@@ -1687,7 +1688,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.069
+      "latency": 0.099
     },
     {
       "seq": 64,
@@ -1698,7 +1699,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.072
+      "latency": 0.097
     },
     {
       "seq": 65,
@@ -1723,7 +1724,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.094
+      "latency": 0.092
     },
     {
       "seq": 66,
@@ -1760,7 +1761,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.107
+      "latency": 0.091
     },
     {
       "seq": 67,
@@ -1809,7 +1810,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.067
+      "latency": 0.07
     },
     {
       "seq": 68,
@@ -1834,7 +1835,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.086
+      "latency": 0.092
     },
     {
       "seq": 69,
@@ -1845,7 +1846,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.078
+      "latency": 0.089
     },
     {
       "seq": 70,
@@ -1870,7 +1871,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.08
+      "latency": 0.091
     },
     {
       "seq": 71,
@@ -1895,7 +1896,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.069
+      "latency": 0.086
     },
     {
       "seq": 72,
@@ -1944,7 +1945,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.137
+      "latency": 0.166
     },
     {
       "seq": 73,
@@ -1981,7 +1982,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.073
+      "latency": 0.093
     },
     {
       "seq": 74,
@@ -2006,7 +2007,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.072
+      "latency": 0.077
     },
     {
       "seq": 75,
@@ -2042,7 +2043,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.066
+      "latency": 0.072
     },
     {
       "seq": 77,
@@ -2053,7 +2054,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.075
+      "latency": 0.077
     },
     {
       "seq": 78,
@@ -2090,7 +2091,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.088
+      "latency": 0.079
     },
     {
       "seq": 79,
@@ -2115,7 +2116,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.079
+      "latency": 0.074
     },
     {
       "seq": 80,
@@ -2140,7 +2141,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.086
+      "latency": 0.075
     },
     {
       "seq": 81,
@@ -2189,7 +2190,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.093
+      "latency": 0.078
     },
     {
       "seq": 82,
@@ -2200,7 +2201,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.087
+      "latency": 0.068
     },
     {
       "seq": 83,
@@ -2237,7 +2238,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.088
+      "latency": 0.094
     },
     {
       "seq": 84,
@@ -2299,7 +2300,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.061
+      "latency": 0.06
     },
     {
       "seq": 86,
@@ -2310,7 +2311,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.105
+      "latency": 0.077
     },
     {
       "seq": 87,
@@ -2335,7 +2336,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.083
+      "latency": 0.073
     },
     {
       "seq": 88,
@@ -2372,7 +2373,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.079
+      "latency": 0.082
     },
     {
       "seq": 89,
@@ -2409,7 +2410,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.088
+      "latency": 0.102
     },
     {
       "seq": 90,
@@ -2446,7 +2447,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.084
+      "latency": 0.098
     },
     {
       "seq": 91,
@@ -2471,7 +2472,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.137
+      "latency": 0.152
     },
     {
       "seq": 92,
@@ -2520,7 +2521,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.1
+      "latency": 0.102
     },
     {
       "seq": 93,
@@ -2545,7 +2546,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.096
+      "latency": 0.086
     },
     {
       "seq": 94,
@@ -2570,7 +2571,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.095
+      "latency": 0.12
     },
     {
       "seq": 95,
@@ -2595,7 +2596,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.075
+      "latency": 0.067
     },
     {
       "seq": 96,
@@ -2620,7 +2621,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.076
+      "latency": 0.1
     },
     {
       "seq": 97,
@@ -2645,7 +2646,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.073
+      "latency": 0.083
     },
     {
       "seq": 98,
@@ -2670,7 +2671,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.07
+      "latency": 0.092
     },
     {
       "seq": 99,
@@ -2707,7 +2708,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.095
+      "latency": 0.09
     },
     {
       "seq": 100,
@@ -2744,7 +2745,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.115
+      "latency": 0.11
     },
     {
       "seq": 101,
@@ -2781,7 +2782,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.084
+      "latency": 0.101
     },
     {
       "seq": 102,
@@ -2792,7 +2793,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.079
+      "latency": 0.092
     },
     {
       "seq": 103,
@@ -2842,7 +2843,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.083
+      "latency": 0.074
     },
     {
       "seq": 105,
@@ -2891,7 +2892,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.119
+      "latency": 0.089
     },
     {
       "seq": 106,
@@ -2902,7 +2903,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.103
+      "latency": 0.083
     },
     {
       "seq": 107,
@@ -2939,7 +2940,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.119
+      "latency": 0.096
     },
     {
       "seq": 108,
@@ -2950,7 +2951,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.097
+      "latency": 0.098
     },
     {
       "seq": 109,
@@ -2961,7 +2962,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.091
+      "latency": 0.072
     },
     {
       "seq": 110,
@@ -2998,7 +2999,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.154
+      "latency": 0.123
     },
     {
       "seq": 111,
@@ -3023,7 +3024,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.069
+      "latency": 0.063
     },
     {
       "seq": 112,
@@ -3034,7 +3035,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.097
+      "latency": 0.103
     },
     {
       "seq": 113,
@@ -3083,7 +3084,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.118
+      "latency": 0.087
     },
     {
       "seq": 114,
@@ -3094,7 +3095,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.073
+      "latency": 0.078
     },
     {
       "seq": 115,
@@ -3131,7 +3132,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.083
+      "latency": 0.093
     },
     {
       "seq": 116,
@@ -3142,7 +3143,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.066
+      "latency": 0.074
     },
     {
       "seq": 117,
@@ -3191,7 +3192,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.088
+      "latency": 0.1
     },
     {
       "seq": 118,
@@ -3216,7 +3217,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.077
+      "latency": 0.093
     },
     {
       "seq": 119,
@@ -3241,7 +3242,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.075
+      "latency": 0.082
     },
     {
       "seq": 120,
@@ -3266,7 +3267,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.075
+      "latency": 0.094
     },
     {
       "seq": 121,
@@ -3315,7 +3316,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.079
+      "latency": 0.109
     },
     {
       "seq": 122,
@@ -3340,7 +3341,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.077
+      "latency": 0.107
     },
     {
       "seq": 123,
@@ -3351,7 +3352,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.088
+      "latency": 0.12
     },
     {
       "seq": 124,
@@ -3388,7 +3389,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.092
+      "latency": 0.138
     },
     {
       "seq": 125,
@@ -3399,7 +3400,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.072
+      "latency": 0.119
     },
     {
       "seq": 126,
@@ -3436,7 +3437,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.08
+      "latency": 0.114
     },
     {
       "seq": 127,
@@ -3461,7 +3462,7 @@
       "missed": [],
       "false": [],
       "error": null,
-      "latency": 0.068
+      "latency": 0.087
     }
   ]
 }

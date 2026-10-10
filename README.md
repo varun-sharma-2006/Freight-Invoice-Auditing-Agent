@@ -151,7 +151,7 @@ Caveat on fairness: the `llm_only` arm is given the correct contract and ground-
 ## Authentication
 
 - **Sign-in is required for every API route** except `/api/health` and the login endpoints. The API issues HMAC-SHA256-signed session tokens that expire after 12 hours (`freight_audit/auth.py`). Tokens are stateless, so they verify on any serverless instance.
-- **Accounts:** set `AUTH_USERS="email:password:Display Name:role;..."`. When it isn't set, a single demo reviewer is active and its credentials appear on the login page for evaluators: `reviewer@freightaudit.demo` / `demo-review-2026`.
+- **Accounts:** set `AUTH_USERS="email:password:Display Name:role;..."`. By default a single demo reviewer is active: `reviewer@freightaudit.demo` / `demo-review-2026`. Its credentials appear on the login page for evaluators whenever that account is configured, including alongside your own accounts in `AUTH_USERS`. Set `AUTH_SHOW_DEMO=0` to hide them.
 - **Production:** set `AUTH_SECRET` to a long random string. The built-in fallback is only for local use and the public demo.
 - **Approvals carry the signed-in identity.** Edits, approvals, rejections and sends are recorded under the signed-in reviewer's name (also in the email's `X-Approved-By` header). A name sent by the client is ignored.
 
@@ -170,7 +170,7 @@ Caveat on fairness: the `llm_only` arm is given the correct contract and ground-
 cd backend
 pip install -r requirements-dev.txt
 python -m synth.generator --out ../data/synthetic
-pytest -q                                    # 95 tests, no network needed
+pytest -q                                    # 98 tests, no network needed
 uvicorn freight_audit.api:app --reload       # http://localhost:8000/docs
 
 # frontend (Node 20+)

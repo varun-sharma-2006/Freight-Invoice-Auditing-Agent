@@ -28,15 +28,15 @@ class LLMInvoice(BaseModel):
     bl_number: str | None = Field(None, description="Bill of lading number")
     origin: str | None = Field(None, description="Port of loading, include UN/LOCODE if printed")
     destination: str | None = Field(None, description="Port of discharge, include UN/LOCODE if printed")
-    container_type: str | None = Field(None, description="One of 20GP, 40GP, 40HC")
+    container_type: str | None = Field(None, description="Container size and type exactly as printed, e.g. \"40' High Cube\", \"40HC\" or \"2 x 20GP\"")
     container_count: int | None = None
     ship_date: str | None = Field(None, description="Sailing / ETD / shipped-on date, YYYY-MM-DD")
     currency: str | None = Field(None, description="ISO currency code of the invoice amounts")
     exchange_rate: float | None = Field(None, description="Units of invoice currency per 1 USD, if printed")
-    equipment_out: str | None = Field(None, description="Empty container gate-out / release / pick-up date, YYYY-MM-DD")
-    equipment_in: str | None = Field(None, description="Empty container return / gate-in date, YYYY-MM-DD")
-    discharge_date: str | None = Field(None, description="Vessel discharge / arrival date, YYYY-MM-DD")
-    pickup_date: str | None = Field(None, description="Full container delivery / collection date, YYYY-MM-DD")
+    equipment_out: str | None = Field(None, description="DETENTION START: date the EMPTY container was released to / picked up by the shipper, YYYY-MM-DD")
+    equipment_in: str | None = Field(None, description="DETENTION END: date the EMPTY container was returned to the carrier, YYYY-MM-DD")
+    discharge_date: str | None = Field(None, description="DEMURRAGE START: date the FULL container was discharged from the vessel at the destination port, YYYY-MM-DD")
+    pickup_date: str | None = Field(None, description="DEMURRAGE END: date the FULL (loaded) container left the destination port for the consignee, YYYY-MM-DD")
     lines: list[LLMLine] = Field(default_factory=list)
     subtotal: float | None = None
     tax_rate_percent: float | None = None
@@ -48,7 +48,9 @@ SYSTEM = """You transcribe freight invoices into JSON. Copy values exactly as pr
 Rules: do not calculate, correct, round or infer missing values - use null if a field is absent.
 Keep every charge line in printed order, including lines that look duplicated.
 Quantities are the printed quantity/units/basis count. Amounts are numbers without currency or
-thousands separators. Dates must be converted to YYYY-MM-DD (printed dd/mm/yyyy is day-first)."""
+thousands separators. Dates must be converted to YYYY-MM-DD (printed dd/mm/yyyy is day-first).
+Detention dates are about the EMPTY container (released to the shipper, returned to the carrier); demurrage
+dates are about the FULL container at the destination port (discharged, then taken away). Do not mix them up."""
 
 
 class ChargeMapping(BaseModel):

@@ -44,6 +44,33 @@ def _exchange_rate(text) -> Decimal | None:
     return parse_decimal(m.group(1) if m else s)
 
 
+def _raw_for(raw: dict, field: str):
+    if field in ("container_type", "container_count") and raw.get("equipment"):
+        return raw.get("equipment")
+    return raw.get(field)
+
+
+# (earlier, later) pairs that hold for any shipment. A misread or swapped date usually breaks one,
+# and D&D charges are computed from these dates, so a violation must not turn into a dispute.
+_DATE_ORDER = [
+    ("equipment_out", "equipment_in", "empty container returned before it was released"),
+    ("discharge_date", "pickup_date", "full container left the port before it was discharged"),
+    ("ship_date", "discharge_date", "container discharged before the vessel sailed"),
+    ("equipment_in", "invoice_date", "detention ends after the invoice date"),
+    ("pickup_date", "invoice_date", "demurrage ends after the invoice date"),
+]
+IMPLAUSIBLE_CONF = 0.5
+
+
+def _check_date_order(out: dict, conf: dict, notes: list[str]) -> None:
+    for first, second, why in _DATE_ORDER:
+        a, b = out.get(first), out.get(second)
+        if a and b and b < a:
+            for f in (first, second):
+                conf[f] = min(conf.get(f, 1.0), IMPLAUSIBLE_CONF)
+            notes.append(f"Implausible dates: {why} ({first} {a}, {second} {b}). Check them against the document.")
+
+
 def assemble(raw: dict, charge_mapper=None) -> tuple[Invoice, list[str]]:
     """Validate and normalize a raw extraction. Raises ExtractionError if unusable.
 
@@ -119,7 +146,10 @@ def assemble(raw: dict, charge_mapper=None) -> tuple[Invoice, list[str]]:
 
     missing = [f for f in REQUIRED if out.get(f) is None]
     if missing or not lines:
-        raise ExtractionError(f"Required fields missing: {missing or ['lines']}", raw)
+        # Name what the extractor actually returned, so a reviewer (or an eval) can see why.
+        got = ", ".join(f"{f}={_raw_for(raw, f)!r}" for f in missing)
+        raise ExtractionError(f"Required fields missing: {missing or ['lines']}" + (f" (extracted: {got})" if got else ""), raw)
 
+    _check_date_order(out, conf, notes)
     inv = Invoice(**{k: v for k, v in out.items()}, lines=lines, field_confidence=conf)
     return inv, notes

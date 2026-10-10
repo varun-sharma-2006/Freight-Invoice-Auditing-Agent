@@ -452,6 +452,8 @@ def main(argv=None) -> None:
     ap.add_argument("--dev", type=int, default=120)
     ap.add_argument("--test", type=int, default=240)
     ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--test-seed", type=int, default=None,
+                    help="draw a fresh test split (same contracts and dev split) once the old one has been looked at")
     ap.add_argument("--dup-rate", type=float, default=0.06)
     ap.add_argument("--heldout-rate", type=float, default=0.2,
                     help="fraction of TEST invoices using the held-out T5 layout (never in dev)")
@@ -469,8 +471,9 @@ def main(argv=None) -> None:
         (out / "contracts" / f"{c.contract_id}.json").write_text(c.model_dump_json(indent=2), encoding="utf-8")
 
     # Separate RNG streams so the test split never shares invoices with dev.
+    test_seed = a.test_seed if a.test_seed is not None else a.seed * 1000 + 2
     for split, n, seed, held in (("dev", a.dev, a.seed * 1000 + 1, 0.0),
-                                 ("test", a.test, a.seed * 1000 + 2, a.heldout_rate)):
+                                 ("test", a.test, test_seed, a.heldout_rate)):
         srng = random.Random(seed)
         items = build_split(InvoiceFactory(srng, contracts, fk), n, srng, a.dup_rate, a.scanned_rate, held)
         write_split(items, out / split)
