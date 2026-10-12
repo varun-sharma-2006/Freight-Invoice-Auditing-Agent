@@ -82,13 +82,20 @@ Each run writes `backend/evals/results/<split>_<arm>.json` (with per-invoice det
 
 ### Current results: fresh held-out test split (`--test-seed 2026`)
 
-The first test split had been looked at once two extraction gaps were diagnosed (see below), so these numbers come from a fresh split. None of its invoices were used for any fixing.
+The first test split had been looked at once two extraction gaps were diagnosed (see below), so these numbers come from a fresh split. None of its invoices were used for any fixing. All three arms see the same first 60 test invoices, and both LLM arms use `gemma-4-26b-a4b-it`.
 
-<!-- from backend/evals/results/test_hybrid_gemini_n60.md, test_hybrid_heuristic_n60.md, test_hybrid_heuristic.md, 2026-10-10 -->
-| Arm (same first 60 test invoices) | Extraction acc. | Recall | Precision | Overcharge found | Falsely claimed | To review |
+<!-- from backend/evals/results/test_hybrid_gemini_n60.md, test_llm_only_n60.md, test_hybrid_heuristic_n60.md, test_hybrid_heuristic.md, 2026-10-12 -->
+| Arm | Extraction acc. | Recall | Precision | Overcharge found | Clean invoices falsely flagged | To review |
 |---|---|---|---|---|---|---|
-| **Gemma extraction + rules (hybrid)** | **99.8%** | **100%** (58/58) | **100%** | **100%** | **USD 0** | 3 |
-| Offline parser + rules | 77.0% | 81.0% | 100% | 77.9% | USD 0 | 13 |
+| **Gemma extraction + rules (hybrid)** | **99.8%** | **100%** (58/58) | **100%** | **100%** | **0 of 25** | 3 |
+| Gemma does everything (LLM-only) | n/a | 72.4% | 51.9% (39 false findings) | 74.9% | 9 of 25 | 4 |
+| Offline parser + rules | 77.0% | 81.0% | 100% | 77.9% | 0 of 25 | 13 |
+
+**The design claim holds on unseen data.** With the same model reading the same PDFs, letting it also judge the invoice dropped precision from 100% to 51.9%. It falsely accused the carrier on 9 of the 25 invoices that had no errors. Most false alarms were rate judgements (`wrong_rate`: 29 false, precision 17.1%), the comparisons the rule engine takes away from the model. On the 56 invoices where both LLM arms returned an answer, the hybrid scored 53/53 with no false findings; LLM-only scored 42 true and 39 false.
+
+- **False-claim money is skewed by one invoice.** LLM-only falsely claimed USD 58,682 in total, but USD 44,738 of that is three "unauthorized charges" on a single INR invoice, most likely amounts misread as USD. Without that invoice it is about USD 13,989 (median false claim USD 102). The hybrid claimed USD 0 falsely.
+- **API failures:** LLM-only had 4 failures, all free-tier API errors (HTTP 500/504 and read timeouts; some calls ran 25+ minutes). They count as missed errors, which lowers its recall but not its precision. Rerunning the same command retries only those 4.
+- **Fairness:** the LLM-only arm is given the correct contract and the ground-truth prior invoices. The hybrid must find the contract from its own extraction, which favours the LLM-only arm.
 
 The offline arm on the full fresh split (254 invoices) scores 78.4% extraction accuracy, 79.5% recall and 100% precision with USD 0 falsely claimed. All 54 of its extraction failures are the held-out T5 layout, which it can't read and sends to review instead of guessing.
 
@@ -105,7 +112,7 @@ On the 30 dev invoices used for diagnosis, extraction went from 79.2% to 99.9% a
 - The rule engine's precision is partly by construction: the generator and the rules share definitions of each error. Real invoices will have ambiguities the generator doesn't produce.
 - On the dev split the offline arm scores 100% everywhere. That is **not evidence of quality**, since the parser was written alongside the generator. `tests/test_rules.py::test_engine_agrees_with_generator_labels` checks the same agreement on 300 invoices.
 
-### Ablation: LLM-only vs hybrid (first test split, superseded results in `evals/results/v1`)
+### Earlier ablation: first test split (superseded results in `evals/results/v1`)
 
 This is the comparison that tests the core design claim: the same model reading the same 60 PDFs, either feeding the rule engine or judging the invoice itself. The Gemini Flash models were overloaded (503) and then over quota on the free-tier development key, so both LLM arms use Gemma 4 (26B) through the same API.
 
@@ -121,7 +128,7 @@ This is the comparison that tests the core design claim: the same model reading 
 
 - **Fairness:** the LLM-only arm was given the correct contract and the ground-truth prior invoices. The hybrid had to find the contract from its own extraction, which favours the LLM-only arm.
 - **API failures:** its 4 failures were API errors (3 read timeouts and 1 HTTP 500 on the free tier), counted as missed errors. They lower its recall but not its precision.
-- **Not repeated on the fresh split.** On the free tier, Gemma's LLM-only prompts (PDF plus full contract) hit repeated 500 errors and 25-minute calls; the ETA passed 12 hours. The hybrid's two extraction fixes don't touch the LLM-only arm, so this comparison still stands. Rerunning it on the fresh split with a paid key takes one command (below).
+- **Repeated on the fresh split** (above), with a wider gap: 100% vs 51.9% precision.
 - **Latency and cost are not meaningful here.** Free-tier Gemma costs nothing, and the 16k input-tokens-per-minute cap makes latency mostly queueing.
 
 To reproduce or extend:
