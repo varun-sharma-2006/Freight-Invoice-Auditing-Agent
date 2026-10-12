@@ -11,3 +11,4 @@ frontend/dist/
 .run_*.log
 .probe/
 *.tsbuildinfo
+backend/evals/results/.ckpt_*
