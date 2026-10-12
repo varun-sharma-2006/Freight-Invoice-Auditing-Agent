@@ -4,6 +4,17 @@ import { Card, Stat } from "../ui";
 
 const pct = (n: number | null | undefined) => (n == null ? "–" : `${n}%`);
 
+const ARM_LABELS: Record<string, string> = {
+  hybrid_gemini: "LLM extraction + rule engine (hybrid)",
+  llm_only: "LLM does everything (ablation baseline)",
+  hybrid_heuristic: "Offline parser + rule engine",
+};
+// Held-out test results first (hybrid, then the ablation, then the offline arm); dev split last.
+const ARM_ORDER = ["hybrid_gemini", "llm_only", "hybrid_heuristic"];
+function order(r: EvalResult) {
+  return (r.split === "test" ? 0 : 100) + (ARM_ORDER.indexOf(r.arm) + 1) * 10 + (r.name.includes("_n") ? 0 : 1);
+}
+
 export default function EvalResults() {
   const [rows, setRows] = useState<EvalResult[] | null>(null);
   useEffect(() => {
@@ -19,8 +30,9 @@ export default function EvalResults() {
         Every number below comes from <code>evals/run_eval.py</code> on synthetic data. The <b>test</b> split was never used for tuning, and it includes
         a layout (T5) that does not appear in dev. Scores on synthetic data say nothing definitive about real invoices.
       </p>
-      {rows.map((r) => (
-        <Card key={r.name} title={<>{r.arm} · <span className="font-normal text-slate-500">{r.split} split, {r.n_invoices} invoices{r.model ? ` · ${r.model}` : ""}</span></>}>
+      {[...rows].sort((a, b) => order(a) - order(b)).map((r) => (
+        <Card key={r.name} title={ARM_LABELS[r.arm] ?? r.arm}
+          subtitle={`${r.split === "test" ? "Held-out test split" : "Development split (used for tuning)"} · ${r.n_invoices} invoices${r.model ? ` · ${r.model}` : ""}`}>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
             <Stat label="Extraction accuracy" value={r.extraction ? pct(r.extraction.field_accuracy) : "n/a"} hint="field-level" />
             <Stat label="Recall" value={pct(r.detection.overall.recall)} hint={`${r.detection.overall.tp}/${r.detection.overall.tp + r.detection.overall.fn} injected errors`} />
